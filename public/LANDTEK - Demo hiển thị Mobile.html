@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<!-- saved from url=(0066)file:///C:/Users/CUONGDV/Downloads/LANDTEK_Demo_HienThiMobile.html -->
+<html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LANDTEK — Demo hiển thị Mobile</title>
+<style>
+  :root{
+    --navy:#0F3460; --blue:#1A56A8; --accent:#F59E0B; --white:#FFFFFF;
+    --gray:#6B7280; --lgray:#F3F4F6; --text:#1F2937; --green:#16A34A;
+    --light:#EBF3FF; --amberbg:#FEF3C7; --border:#E5E7EB;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+    background:#EEF1F5;
+    display:flex; flex-direction:column; align-items:center;
+    padding:40px 16px 80px;
+    gap:20px;
+  }
+  .page-title{ text-align:center; max-width:640px; }
+  .page-title h1{ font-size:22px; color:var(--navy); margin-bottom:6px; }
+  .page-title p{ font-size:14px; color:var(--gray); }
+  .compare-row{ display:flex; gap:32px; flex-wrap:wrap; justify-content:center; }
+  .col{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .col-label{ font-size:13px; font-weight:700; color:var(--navy); background:var(--light); padding:5px 14px; border-radius:20px; }
+  .col-label.bad{ background:#FEE2E2; color:#B91C1C; }
+  .col-label.good{ background:#DCFCE7; color:#15803D; }
+
+  /* ===== PHONE FRAME ===== */
+  .phone{
+    width:375px; height:812px;
+    background:#0a0a0a;
+    border-radius:44px;
+    padding:12px;
+    box-shadow:0 25px 60px rgba(15,52,96,0.35), 0 0 0 2px #1a1a1a;
+    position:relative;
+  }
+  .phone-screen{
+    width:100%; height:100%;
+    background:var(--white);
+    border-radius:34px;
+    overflow:hidden;
+    position:relative;
+    display:flex; flex-direction:column;
+  }
+  .notch{
+    position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:120px; height:26px; background:#0a0a0a;
+    border-radius:0 0 16px 16px; z-index:100;
+  }
+  .statusbar{
+    height:44px; flex:0 0 44px;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 22px; font-size:13px; font-weight:600; color:var(--text);
+    background:var(--white); z-index:50; position:relative;
+  }
+  .scroll-area{
+    flex:1; overflow-y:auto; overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:70px;
+  }
+  .scroll-area::-webkit-scrollbar{ width:0; }
+
+  /* App top bar */
+  .appbar{
+    position:absolute; top:44px; left:0; right:0; z-index:40;
+    display:flex; justify-content:space-between; padding:12px 14px;
+    pointer-events:none;
+  }
+  .appbar button{
+    width:34px; height:34px; border-radius:50%;
+    background:rgba(15,52,96,0.55); border:none;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:16px; pointer-events:auto;
+  }
+  .appbar .right{ display:flex; gap:8px; }
+
+  /* Carousel */
+  .carousel{
+    position:relative; width:100%; height:280px;
+    overflow-x:auto; overflow-y:hidden; display:flex;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+  }
+  .carousel::-webkit-scrollbar{ display:none; }
+  .carousel .slide{
+    min-width:100%; height:280px; scroll-snap-align:start;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:13px; font-weight:600; letter-spacing:.5px;
+    position:relative;
+  }
+  .slide.s1{ background:linear-gradient(135deg,#1A56A8,#0F3460); }
+  .slide.s2{ background:linear-gradient(135deg,#2563AF,#123a6e); }
+  .slide.s3{ background:linear-gradient(135deg,#3568b5,#0F3460); }
+  .slide.s4{ background:linear-gradient(135deg,#173f74,#0a2547); }
+  .dots{
+    position:absolute; bottom:12px; left:0; right:0;
+    display:flex; justify-content:center; gap:5px; z-index:20;
+  }
+  .dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.45); }
+  .dot.active{ background:#fff; width:16px; border-radius:4px; }
+  .photo-count{
+    position:absolute; bottom:12px; right:14px; z-index:20;
+    background:rgba(0,0,0,.45); color:#fff; font-size:11px;
+    padding:3px 9px; border-radius:12px;
+  }
+
+  /* Content blocks */
+  .block{ padding:16px; border-bottom:8px solid var(--lgray); }
+  .price-row{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .price{ font-size:24px; font-weight:800; color:var(--navy); }
+  .badge{
+    font-size:10px; font-weight:700; color:var(--green);
+    background:#DCFCE7; padding:3px 8px; border-radius:6px;
+    display:flex; align-items:center; gap:3px;
+  }
+  .title{ font-size:15px; font-weight:700; color:var(--text); line-height:1.4; margin-bottom:4px; }
+  .addr{ font-size:12.5px; color:var(--gray); display:flex; align-items:center; gap:4px; }
+
+  .icon-row{ display:flex; gap:0; margin-top:14px; }
+  .icon-item{ flex:1; text-align:center; }
+  .icon-item .val{ font-size:14px; font-weight:700; color:var(--navy); }
+  .icon-item .lbl{ font-size:10.5px; color:var(--gray); margin-top:2px; }
+  .icon-sep{ width:1px; background:var(--border); margin:2px 8px; }
+
+  .block h3{ font-size:13.5px; color:var(--navy); font-weight:700; margin-bottom:10px; }
+  .spec-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; }
+  .spec-item{ display:flex; align-items:center; gap:8px; }
+  .spec-icon{ width:28px; height:28px; border-radius:8px; background:var(--light); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+  .spec-item .t{ font-size:11px; color:var(--gray); }
+  .spec-item .v{ font-size:12.5px; font-weight:600; color:var(--text); }
+
+  .desc-text{ font-size:12.5px; color:var(--text); line-height:1.65; }
+  .desc-text.clamped{ display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+  .see-more{
+    margin-top:8px; background:none; border:none; color:var(--blue);
+    font-size:12.5px; font-weight:700; padding:0; display:flex; align-items:center; gap:3px; cursor:pointer;
+  }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    font-size:11.5px; color:var(--navy); background:var(--light);
+    padding:7px 12px; border-radius:20px; display:flex; align-items:center; gap:5px; font-weight:600;
+  }
+
+  .map-box{
+    height:120px; border-radius:12px; background:
+      linear-gradient(0deg, rgba(26,86,168,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,86,168,.08) 1px, transparent 1px), #eef2f8;
+    background-size:20px 20px;
+    position:relative; display:flex; align-items:center; justify-content:center;
+  }
+  .map-pin{ font-size:26px; }
+  .map-label{ position:absolute; bottom:8px; left:8px; background:#fff; font-size:10.5px; padding:4px 8px; border-radius:6px; color:var(--navy); font-weight:600; box-shadow:0 1px 4px rgba(0,0,0,.1); }
+
+  .agent-row{ display:flex; align-items:center; gap:10px; }
+  .avatar{ width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--accent),#d97706); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:16px; flex-shrink:0; }
+  .agent-info{ flex:1; }
+  .agent-name{ font-size:13px; font-weight:700; color:var(--text); }
+  .agent-sub{ font-size:11px; color:var(--gray); margin-top:1px; }
+  .agent-badge{ font-size:9.5px; background:var(--amberbg); color:#92400E; padding:2px 6px; border-radius:5px; font-weight:700; margin-left:4px; }
+  .schedule-btn{
+    width:100%; margin-top:12px; background:var(--light); color:var(--blue);
+    border:1px solid #C7D9F0; border-radius:10px; padding:10px; font-size:12.5px; font-weight:700;
+  }
+
+  .similar-scroll{ display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
+  .similar-scroll::-webkit-scrollbar{ display:none; }
+  .sim-card{ min-width:140px; border-radius:10px; overflow:hidden; border:1px solid var(--border); }
+  .sim-img{ height:80px; background:linear-gradient(135deg,#c7d9f0,#8fb1de); }
+  .sim-body{ padding:8px; }
+  .sim-price{ font-size:12px; font-weight:700; color:var(--navy); }
+  .sim-title{ font-size:10.5px; color:var(--text); margin-top:2px; line-height:1.3; }
+
+  /* Sticky bottom bar */
+  .bottom-bar{
+    position:absolute; bottom:0; left:0; right:0; z-index:60;
+    background:#fff; border-top:1px solid var(--border);
+    padding:10px 14px 22px; display:flex; gap:10px;
+    box-shadow:0 -4px 12px rgba(0,0,0,.04);
+  }
+  .btn-save{
+    width:44px; height:44px; border-radius:12px; border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; background:#fff;
+  }
+  .btn-call, .btn-zalo{
+    flex:1; height:44px; border-radius:12px; border:none;
+    font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .btn-call{ background:var(--navy); color:#fff; }
+  .btn-zalo{ background:#DBEAFE; color:var(--blue); }
+
+  /* annotation callouts for the good version */
+  .callout{
+    background:#0F3460; color:#fff; font-size:11px; padding:8px 12px;
+    border-radius:8px; max-width:290px; text-align:center; line-height:1.5;
+    position:relative; margin-top:6px;
+  }
+  .callout b{ color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>Demo hiển thị tin đăng trên Mobile</h1>
+  <p>Mô phỏng theo đặc tả SPEC-FORM-01 — dữ liệu thật từ tin "Hà Quang 2, view công viên"</p>
+</div>
+
+<div class="compare-row">
+
+  <!-- ===================== PHONE 1 ===================== -->
+  <div class="col">
+    <span class="col-label good">✓ Bản đề xuất — theo đặc tả mới</span>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="notch"></div>
+        <div class="statusbar">
+          <span>9:41</span>
+          <span>●●●● 5G 🔋</span>
+        </div>
+        <div class="appbar">
+          <button>←</button>
+          <div class="right">
+            <button>♡</button>
+            <button>⤴</button>
+          </div>
+        </div>
+
+        <div class="scroll-area" id="scrollArea1">
+          <div class="carousel" id="carousel1">
+            <div class="slide s1">Ảnh 1 / 12</div>
+            <div class="slide s2">Ảnh 2 / 12</div>
+            <div class="slide s3">Ảnh 3 / 12</div>
+            <div class="slide s4">🎬 Video giới thiệu</div>
+          </div>
+          <div class="dots" id="dots1">
+            <div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+          <div class="photo-count">1/12</div>
+
+          <div class="block" style="border-bottom:1px solid var(--border); padding-bottom:14px;">
+            <div class="price-row">
+              <span class="price">25 triệu/tháng</span>
+              <span class="badge">✓ Đã xác thực</span>
+            </div>
+            <div class="title">Cho thuê nhà nguyên căn KĐT Hà Quang 2 — view công viên</div>
+            <div class="addr">📍 Phước Hải, Nha Trang</div>
+
+            <div class="icon-row">
+              <div class="icon-item"><div class="val">100 m²</div><div class="lbl">Diện tích</div></div>
+              <div class="icon-sep"></div>
+              <div class="icon-item"><div class="val">4</div><div class="lbl">Phòng ngủ</div></div>
+              <div class="icon-sep"></div>
+              <div class="icon-item"><div class="val">6</div><div class="lbl">WC</div></div>
+            </div>
+          </div>
+
+          <div class="block">
+            <h3>ĐẶC ĐIỂM BẤT ĐỘNG SẢN</h3>
+            <div class="spec-grid">
+              <div class="spec-item"><div class="spec-icon">📐</div><div><div class="t">Diện tích đất</div><div class="v">80 m²</div></div></div>
+              <div class="spec-item"><div class="spec-icon">🏗️</div><div><div class="t">Diện tích sử dụng</div><div class="v">220 m²</div></div></div>
+              <div class="spec-item"><div class="spec-icon">🏢</div><div><div class="t">Số tầng</div><div class="v">3 tầng</div></div></div>
+              <div class="spec-item"><div class="spec-icon">🛗</div><div><div class="t">Thang máy</div><div class="v">Có</div></div></div>
+              <div class="spec-item"><div class="spec-icon">🚪</div><div><div class="t">Vị trí</div><div class="v">Mặt tiền đường</div></div></div>
+              <div class="spec-item"><div class="spec-icon">📄</div><div><div class="t">Pháp lý</div><div class="v">Sổ hồng</div></div></div>
+              <div class="spec-item"><div class="spec-icon">🛋️</div><div><div class="t">Nội thất</div><div class="v">Nhà mới, sạch đẹp</div></div></div>
+              <div class="spec-item"><div class="spec-icon">📅</div><div><div class="t">Dọn vào</div><div class="v">Ngay</div></div></div>
+            </div>
+          </div>
+
+          <div class="block">
+            <h3>MÔ TẢ</h3>
+            <div class="desc-text clamped" id="descText">
+              Nhà phố 3 tầng, 4 phòng ngủ, 6 WC. Có thang máy, nhà mới, sạch đẹp. Vị trí đối diện công viên, thoáng mát, xe cộ đi lại thoải mái. Phù hợp làm văn phòng, kinh doanh hoặc gia đình ở kết hợp làm việc. Khu vực an ninh tốt, gần trường học và chợ dân sinh, thuận tiện di chuyển vào trung tâm thành phố chỉ 10 phút.
+            </div>
+            <button class="see-more" id="seeMoreBtn" onclick="toggleDesc()">Xem thêm ⌄</button>
+          </div>
+
+          <div class="block">
+            <h3>TIỆN ÍCH</h3>
+            <div class="chips">
+              <div class="chip">📶 Wifi mạnh</div>
+              <div class="chip">🅿️ Chỗ đậu xe</div>
+              <div class="chip">🛗 Thang máy</div>
+              <div class="chip">🍳 Bếp đầy đủ</div>
+              <div class="chip">🔇 Yên tĩnh</div>
+            </div>
+          </div>
+
+          <div class="block">
+            <h3>VỊ TRÍ</h3>
+            <div class="map-box">
+              <span class="map-pin">📍</span>
+              <span class="map-label">Chạm để mở bản đồ</span>
+            </div>
+          </div>
+
+          <div class="block">
+            <h3>MÔI GIỚI</h3>
+            <div class="agent-row">
+              <div class="avatar">TH</div>
+              <div class="agent-info">
+                <div class="agent-name">Trần Hải <span class="agent-badge">SILVER</span></div>
+                <div class="agent-sub">28 tin đang đăng · Phản hồi trong 5 phút</div>
+              </div>
+            </div>
+            <button class="schedule-btn">🗓️ Đặt lịch xem nhà</button>
+          </div>
+
+          <div class="block" style="border-bottom:none;">
+            <h3>TIN TƯƠNG TỰ</h3>
+            <div class="similar-scroll">
+              <div class="sim-card">
+                <div class="sim-img"></div>
+                <div class="sim-body">
+                  <div class="sim-price">18 triệu/th</div>
+                  <div class="sim-title">Căn hộ 2PN Vĩnh Nguyên</div>
+                </div>
+              </div>
+              <div class="sim-card">
+                <div class="sim-img"></div>
+                <div class="sim-body">
+                  <div class="sim-price">33,5 triệu/th</div>
+                  <div class="sim-title">Nhà phố 1,9km tới biển</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-bar">
+          <button class="btn-save">♡</button>
+          <button class="btn-call">📞 Gọi điện</button>
+          <button class="btn-zalo">💬 Chat Zalo</button>
+        </div>
+      </div>
+    </div>
+    <div class="callout">✓ Nút "Xem thêm" hoạt động đúng — <b>chạm thử bên trên</b>. Ảnh đầy đủ 12 tấm, thanh hành động cố định luôn hiện khi cuộn.</div>
+  </div>
+
+  <!-- ===================== PHONE 2: hiện trạng lỗi ===================== -->
+  <div class="col">
+    <span class="col-label bad">✕ Hiện trạng — các lỗi đã phát hiện</span>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="notch"></div>
+        <div class="statusbar">
+          <span>9:41</span>
+          <span>●●●● 5G 🔋</span>
+        </div>
+
+        <div class="scroll-area" style="padding-top:10px;">
+          <div class="block" style="border-bottom:none; padding-top:6px;">
+            <div style="display:flex; gap:6px; margin-bottom:14px;">
+              <div style="width:70px; height:70px; border-radius:8px; background:linear-gradient(135deg,#1A56A8,#0F3460);"></div>
+              <div style="width:70px; height:70px; border-radius:8px; background:linear-gradient(135deg,#2563AF,#123a6e);"></div>
+              <div style="width:70px; height:70px; border-radius:8px; background:linear-gradient(135deg,#3568b5,#0F3460);"></div>
+              <div style="width:70px; height:70px; border-radius:8px; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-size:11px; color:#9ca3af; text-align:center;">+4<br>ảnh</div>
+            </div>
+            <div style="font-size:11px; color:#B91C1C; font-weight:700; margin-bottom:14px;">⚠ Chỉ 7 ảnh, không có video, không carousel toàn màn hình</div>
+
+            <div class="title">CHO THUÊ NHÀ NGUYÊN CĂN - KĐT HÀ QUANG 2 (VIEW CÔNG VIÊN)</div>
+            <div class="addr" style="margin-bottom:10px;">Phước Hải, Nha Trang, Phước Hải, Nha Trang</div>
+            <div style="font-size:11px; color:#B91C1C; font-weight:700; margin-bottom:14px;">⚠ Địa chỉ lặp 2 lần, tiêu đề viết hoa toàn bộ khó đọc</div>
+
+            <div class="price" style="font-size:18px; margin-bottom:14px;">25 triệu / tháng</div>
+
+            <h3 style="margin-top:6px;">Mô tả</h3>
+            <div class="desc-text" style="background:#FEF2F2; padding:10px; border-radius:8px; border:1px dashed #FCA5A5;">
+              ...​Giá thuê: 25 triệu/tháng.<br>
+              ***Phù hợp làm VP, kinh doanh hoặc gia đình ở kết hợp làm việc.<br>
+              👉 Anh chị quan tâm inbox em gửi thêm hình ảnh thực tế nhé!<br>
+              ☎️ LH: 0868 979 799 <u style="color:#B91C1C;">Xem thêm</u><br><br>
+              <span style="color:#B91C1C;">h chị quan tâm inbox em gửi thêm hình ảnh thực tế nhé!<br>
+              ☎️ LH: 0868 979 799</span>
+            </div>
+            <div style="font-size:11px; color:#B91C1C; font-weight:700; margin-top:8px; margin-bottom:14px;">⚠ Nút "Xem thêm" bị lộ thành chữ thường + nội dung lặp lại 2 lần</div>
+
+            <h3>Tiện ích</h3>
+            <div class="chips" style="margin-bottom:14px;">
+              <div class="chip">Wifi mạnh</div><div class="chip">Yên tĩnh</div><div class="chip">Chỗ đậu xe</div>
+            </div>
+
+            <h3>Môi giới</h3>
+            <div class="agent-row" style="margin-bottom:14px;">
+              <div style="width:44px;height:44px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:20px;">M</div>
+              <div class="agent-info">
+                <div class="agent-name">Môi giới 1</div>
+                <div class="agent-sub">Silver Agent</div>
+              </div>
+            </div>
+            <div style="font-size:11px; color:#B91C1C; font-weight:700; margin-bottom:14px;">⚠ Tên môi giới là chữ đặt chỗ, icon avatar vỡ (hiện chữ "M")</div>
+
+            <h3>Tin tương tự</h3>
+            <div class="desc-text" style="color:#B91C1C; font-style:italic;">
+              "Amet vero dolores et illo voluptas." — Đã xác thực<br>
+              "Căn hộ 2 phòng ngủ test" — Đã xác thực
+            </div>
+            <div style="font-size:11px; color:#B91C1C; font-weight:700; margin-top:8px;">⚠ Dữ liệu giữ chỗ (Lorem Ipsum, "test") hiển thị công khai</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="callout" style="background:#7F1D1D;">6 lỗi hiển thị được khoanh vùng trực tiếp trên giao diện thật — đối chiếu từng dòng với báo cáo kỹ thuật đã gửi.</div>
+  </div>
+
+</div>
+
+<script>
+function toggleDesc(){
+  const desc = document.getElementById('descText');
+  const btn = document.getElementById('seeMoreBtn');
+  const expanded = desc.classList.toggle('clamped');
+  btn.innerHTML = expanded ? 'Xem thêm ⌄' : 'Thu gọn ⌃';
+}
+// carousel dot sync
+const carousel1 = document.getElementById('carousel1');
+const dots1 = document.getElementById('dots1').children;
+carousel1.addEventListener('scroll', () => {
+  const idx = Math.round(carousel1.scrollLeft / carousel1.clientWidth);
+  for(let i=0;i<dots1.length;i++){ dots1[i].classList.toggle('active', i===idx); }
+});
+</script>
+
+
+</body></html>

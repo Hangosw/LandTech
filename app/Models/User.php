@@ -2,48 +2,96 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Model
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    use HasRoles;
     protected $fillable = [
-        'name',
+        'phone',
         'email',
-        'password',
+        'name',
+        'address',
+        'password_hash',
+        'user_type',
+        'nationality',
+        'avatar_url',
+        'is_verified',
+        'status',
+        'agent_tier',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password_hash',
+    ];
+
+    protected $casts = [
+        'is_verified' => 'boolean',
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Get the properties posted by this user.
      */
-    protected function casts(): array
+    public function properties(): HasMany
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasMany(Property::class);
+    }
+
+    /**
+     * Get transactions where this user is the buyer.
+     */
+    public function transactionsAsBuyer(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'buyer_id');
+    }
+
+    /**
+     * Get transactions where this user is the seller.
+     */
+    public function transactionsAsSeller(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'seller_id');
+    }
+
+    /**
+     * Get rentals where this user is the renter.
+     */
+    public function rentalsAsRenter(): HasMany
+    {
+        return $this->hasMany(Rental::class, 'renter_id');
+    }
+
+    /**
+     * Get rentals where this user is the owner/landlord.
+     */
+    public function rentalsAsOwner(): HasMany
+    {
+        return $this->hasMany(Rental::class, 'owner_id');
+    }
+
+    /**
+     * Get the OAuth connections for this user.
+     */
+    public function oauthProviders(): HasMany
+    {
+        return $this->hasMany(UserOAuthProvider::class);
+    }
+
+    /**
+     * Check if user is linked to a specific OAuth provider.
+     */
+    public function isLinkedTo(string $provider): bool
+    {
+        return $this->oauthProviders()->where('provider', $provider)->exists();
+    }
+
+    /**
+     * Get list of linked provider names.
+     */
+    public function getLinkedProviders(): array
+    {
+        return $this->oauthProviders()->pluck('provider')->toArray();
     }
 }
