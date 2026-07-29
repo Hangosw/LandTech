@@ -6,10 +6,10 @@
 
         {{-- Desktop nav --}}
         <nav class="hidden md:flex gap-8 items-center flex-1 justify-center">
-            <a href="{{ route('rent.list') }}" class="text-gray-700 hover:text-teal-600 font-medium">Thuê nhà</a>
+            <a href="{{ route('home') }}" class="text-gray-700 hover:text-teal-600 font-medium">Thuê nhà</a>
+            <a href="{{ route('owners') }}" class="text-gray-700 hover:text-teal-600 font-medium">Chủ nhà & Quản lý gia sản</a>
             <a href="{{ route('projects') }}" class="text-gray-700 hover:text-teal-600 font-medium">Dự án</a>
             <a href="{{ route('agents') }}" class="text-gray-700 hover:text-teal-600 font-medium">Môi giới</a>
-            <a href="{{ route('wishlist') }}" class="text-gray-700 hover:text-teal-600 font-medium">Yêu thích</a>
         </nav>
 
         {{-- Right side actions --}}
@@ -109,17 +109,17 @@
     {{-- Nav links --}}
     <nav style="flex:1; overflow-y:auto; padding:8px 0;">
 
-        <a href="{{ route('rent.list') }}" class="mob-drawer-link">
+        <a href="{{ route('home') }}" class="mob-drawer-link">
             <i class="fas fa-home" style="color:#0d9488; width:18px;"></i> Thuê nhà
+        </a>
+        <a href="{{ route('owners') }}" class="mob-drawer-link">
+            <i class="fas fa-building" style="color:#0d9488; width:18px;"></i> Chủ nhà & Quản lý gia sản
         </a>
         <a href="{{ route('projects') }}" class="mob-drawer-link">
             <i class="fas fa-building" style="color:#0d9488; width:18px;"></i> Dự án
         </a>
         <a href="{{ route('agents') }}" class="mob-drawer-link">
             <i class="fas fa-user-tie" style="color:#0d9488; width:18px;"></i> Môi giới
-        </a>
-        <a href="{{ route('wishlist') }}" class="mob-drawer-link">
-            <i class="fas fa-heart" style="color:#0d9488; width:18px;"></i> Yêu thích
         </a>
 
         <div style="margin:8px 20px; border-top:1px solid #f3f4f6;"></div>

@@ -8,7 +8,8 @@
     
     {{-- CSS --}}
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    @vite('resources/css/app.css')
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pU1YenK5y9cI0Cpu0+lLECcw6uJ1Ql6zM4tsd0wY7PZhwrVWrZ+pp3Yci2eIn3qxBfFOaIb7+qwYVkg0C+W2eA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
@@ -21,7 +22,7 @@
     @include('components.footer')
     
     {{-- Scripts --}}
-    @vite('resources/js/app.js')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // ===== GLOBAL SWEETALERT2 MIXIN =====

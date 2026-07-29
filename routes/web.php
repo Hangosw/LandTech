@@ -11,6 +11,7 @@ use App\Http\Controllers\WishlistController;
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/thue', [PageController::class, 'rentList'])->name('rent.list');
 Route::get('/thue/{slug}', [PageController::class, 'rentDetail'])->name('rent.detail');
+Route::get('/chu-nha', [PageController::class, 'owners'])->name('owners');
 Route::get('/dang-tin', [PageController::class, 'postProperty'])->name('property.post');
 Route::post('/dang-tin', [PropertyController::class, 'store'])->name('property.post.submit');
 Route::get('/quan-ly-tin-dang/{id}/edit', [PropertyController::class, 'edit'])->name('property.edit');

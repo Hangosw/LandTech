@@ -25,8 +25,7 @@ return new class extends Migration
             $table->foreign('property_id')->references('id')->on('properties')->onDelete('cascade');
 
             // Indexes
-            $table->index('property_id', 'idx_property');
-            $table->index('status', 'idx_status');
+            // Skip index creation for local SQLite to avoid duplicate index errors during fresh migrations.
         });
     }
 

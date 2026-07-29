@@ -1,0 +1,486 @@
+@extends('layouts.app')
+
+@section('title', 'LANDTEK — Thuê & Cho thuê bất động sản Nha Trang')
+@section('description', 'Nền tảng thuê nhà chuyên biệt tại Nha Trang: căn hộ view biển, nhà phố, văn phòng')
+
+@section('content')
+<div class="bg-gray-50 min-h-screen pb-12">
+
+    {{-- ────────────────────────── HERO SECTION ────────────────────────── --}}
+    <section class="relative z-20">
+        <img 
+            src="/images/hero-nhatrang.jpg" 
+            alt="Bờ biển Nha Trang"
+            class="h-[75vh] min-h-[520px] w-full object-cover"
+        >
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-black/40"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
+ 
+        <div class="absolute inset-0 flex flex-col items-center justify-center px-4">
+            <div class="w-full max-w-5xl mx-auto text-center mt-10">
+                <!-- Top Badge -->
+                <div class="mb-5 flex justify-center">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-teal-500/90 backdrop-blur-sm px-4 py-1.5 text-xs font-semibold text-white border border-teal-400/50 shadow-sm">
+                        <i class="fas fa-gem text-[10px]"></i> Nền tảng BĐS số 1 Nha Trang
+                    </span>
+                </div>
+
+                <!-- Main Heading & Description -->
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-white drop-shadow-md mb-4">
+                    Thuê nhà ven biển Nha Trang<br class="hidden sm:block"> dễ dàng & an tâm
+                </h1>
+                <p class="text-base sm:text-lg text-white/90 drop-shadow max-w-2xl mx-auto mb-8 font-medium">
+                    Hàng nghìn căn hộ, nhà phố và văn phòng cho thuê với tin đăng đã xác thực.
+                </p>
+
+                <!-- Search Bar Section -->
+                <div id="searchContainer" class="w-full max-w-2xl mx-auto">
+
+                    {{-- Compact search input (always visible) --}}
+                    <div
+                        id="searchInputRow"
+                        onclick="openSearch()"
+                        class="flex items-center gap-3 bg-white rounded-full shadow-xl px-5 py-4 cursor-text transition-all duration-300 border border-white/30 hover:shadow-2xl"
+                    >
+                        <i class="fas fa-search text-teal-500 text-base flex-shrink-0"></i>
+                        <input
+                            id="searchInput"
+                            type="text"
+                            placeholder="Tìm dự án, khu vực..."
+                            class="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400 text-sm font-medium caret-teal-500"
+                            onclick="event.stopPropagation(); openSearch()"
+                        >
+                        {{-- Chevron indicator --}}
+                        <i id="searchChevron" class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-300 flex-shrink-0"></i>
+                    </div>
+
+                    {{-- Slide-down filter panel --}}
+                    <div
+                        id="searchFilterPanel"
+                        class="overflow-hidden transition-all duration-400 ease-in-out"
+                        style="max-height: 0; opacity: 0;"
+                    >
+                        <div class="bg-white rounded-2xl shadow-2xl mt-2 p-4 border border-gray-100 flex flex-col gap-3">
+
+                            {{-- Loại BĐS --}}
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-1">Loại BĐS</label>
+                                <select class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 text-sm font-medium outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 cursor-pointer transition-all">
+                                    <option>Tất cả loại BĐS</option>
+                                    <option>Căn hộ</option>
+                                    <option>Nhà phố</option>
+                                    <option>Văn phòng</option>
+                                    <option>Studio</option>
+                                </select>
+                            </div>
+
+                            {{-- Khu vực --}}
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-1">Khu vực</label>
+                                <select class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 text-sm font-medium outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 cursor-pointer transition-all">
+                                    <option>Tất cả khu vực</option>
+                                    <option>Lộc Thọ</option>
+                                    <option>Phước Hải</option>
+                                    <option>Vĩnh Phước</option>
+                                    <option>Tân Lập</option>
+                                    <option>Vĩnh Trường</option>
+                                </select>
+                            </div>
+
+                            {{-- Tìm kiếm button --}}
+                            <button
+                                onclick="doSearch()"
+                                class="group relative overflow-hidden w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white px-6 py-3.5 rounded-xl font-bold text-sm shadow-md shadow-teal-500/30 hover:from-teal-400 hover:to-teal-500 hover:shadow-lg hover:shadow-teal-500/40 active:scale-[0.98] transition-all duration-200 inline-flex items-center justify-center gap-2"
+                            >
+                                <i class="fas fa-search text-xs"></i>
+                                Tìm kiếm
+                                <span class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl"></span>
+                            </button>
+
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+
+    {{-- ────────────────────────── FEATURES SECTION ────────────────────────── --}}
+    <section class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 mt-12 mb-14">
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="bg-white p-6 rounded-[28px] border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-50 text-teal-700 mb-4 shadow-sm">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 text-lg mb-2">Tin đăng xác thực</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Tất cả tin đăng đều được kiểm duyệt để tránh tin ảo và thông tin sai lệch.</p>
+            </div>
+            <div class="bg-white p-6 rounded-[28px] border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-50 text-teal-700 mb-4 shadow-sm">
+                    <i class="fa-regular fa-calendar-check text-xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 text-lg mb-2">Đặt lịch dễ dàng</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Chọn ngày xem, gặp môi giới và nhận phản hồi nhanh chóng ngay trên nền tảng.</p>
+            </div>
+            <div class="bg-white p-6 rounded-[28px] border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-50 text-teal-700 mb-4 shadow-sm">
+                    <i class="fa-solid fa-location-dot text-xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 text-lg mb-2">Chọn khu vực chủ động</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Tìm nhanh căn hộ view biển, nhà phố trung tâm hay văn phòng tại Nha Trang.</p>
+            </div>
+            <div class="bg-white p-6 rounded-[28px] border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-50 text-teal-700 mb-4 shadow-sm">
+                    <i class="fa-solid fa-users-line text-xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 text-lg mb-2">Đội ngũ uy tín</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Môi giới và chủ nhà được kết nối nhanh, minh bạch, có hỗ trợ chuyên môn.</p>
+            </div>
+        </div>
+    </section>
+
+    {{-- ────────────────────────── WHY LANDTEK SECTION ────────────────────────── --}}
+    <section class="bg-white border-t border-b border-gray-100 py-12">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                <div class="max-w-xl">
+                    <span class="inline-flex items-center rounded-full bg-teal-100 text-teal-700 px-3 py-1 text-xs font-semibold tracking-wide">LANDTEK cho chủ nhà</span>
+                    <h2 class="mt-5 text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight">Quản lý cho thuê thật nhanh, tin cậy và minh bạch</h2>
+                    <p class="mt-4 text-gray-600 text-sm sm:text-base leading-relaxed">Từ đăng tin đến hợp đồng, LANDTEK giúp chủ nhà vận hành tài sản hiệu quả mà không cần lo lắng từng chi tiết.</p>
+                    <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                        <a href="{{ route('rent.list') }}" class="inline-flex items-center justify-center rounded-full bg-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 hover:bg-teal-500 transition">Duyệt tin cho thuê</a>
+                        <a href="{{ route('property.post') }}" class="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">Đăng tin cho chủ nhà</a>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="rounded-[28px] border border-gray-100 bg-teal-50 p-6 shadow-sm">
+                        <p class="text-sm text-teal-700 uppercase tracking-[0.18em] font-bold">Số liệu nổi bật</p>
+                        <div class="mt-5 space-y-4">
+                            <div class="flex items-center justify-between text-gray-900 font-semibold text-lg"><span>Tin xác thực</span><span>+98%</span></div>
+                            <div class="flex items-center justify-between text-gray-900 font-semibold text-lg"><span>Tỷ lệ lấp đầy</span><span>92%</span></div>
+                            <div class="flex items-center justify-between text-gray-900 font-semibold text-lg"><span>Phản hồi</span><span>24h</span></div>
+                        </div>
+                    </div>
+                    <div class="rounded-[28px] border border-gray-100 bg-white p-6 shadow-sm">
+                        <p class="text-sm text-gray-500">Hỗ trợ</p>
+                        <h3 class="mt-3 text-xl font-bold text-gray-900">Tư vấn đúng giá, thu tiền nhanh</h3>
+                        <p class="mt-3 text-sm text-gray-600">Chúng tôi thực hiện đánh giá kê khai, kiểm tra pháp lý và xây dựng nội dung tin chuyên nghiệp.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ────────────────────────── PROCESS SECTION ────────────────────────── --}}
+    <section class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-12">
+        <div class="text-center mx-auto max-w-2xl">
+            <span class="inline-flex items-center rounded-full bg-gray-100 text-teal-700 px-3 py-1 text-xs font-semibold tracking-wide">QUY TRÌNH RÕ RÀNG</span>
+            <h2 class="mt-4 text-3xl sm:text-4xl font-extrabold text-gray-900">5 bước đơn giản giao kết & cho thuê</h2>
+            <p class="mt-4 text-gray-600 text-sm sm:text-base leading-relaxed">Từ khảo sát đến bàn giao tiền thuê, từng bước được LANDTEK tối ưu để chủ nhà an tâm.</p>
+        </div>
+        <div class="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <div class="rounded-3xl border border-gray-100 bg-white p-6 text-center shadow-sm hover:shadow-md transition">
+                <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-teal-50 text-teal-700 mx-auto">1</div>
+                <p class="mt-4 text-sm font-semibold text-gray-900">Khảo sát và định giá</p>
+            </div>
+            <div class="rounded-3xl border border-gray-100 bg-white p-6 text-center shadow-sm hover:shadow-md transition">
+                <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-teal-50 text-teal-700 mx-auto">2</div>
+                <p class="mt-4 text-sm font-semibold text-gray-900">Ký thỏa thuận dịch vụ</p>
+            </div>
+            <div class="rounded-3xl border border-gray-100 bg-white p-6 text-center shadow-sm hover:shadow-md transition">
+                <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-teal-50 text-teal-700 mx-auto">3</div>
+                <p class="mt-4 text-sm font-semibold text-gray-900">Đăng tin & kiểm duyệt</p>
+            </div>
+            <div class="rounded-3xl border border-gray-100 bg-white p-6 text-center shadow-sm hover:shadow-md transition">
+                <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-teal-50 text-teal-700 mx-auto">4</div>
+                <p class="mt-4 text-sm font-semibold text-gray-900">Ký hợp đồng thuê</p>
+            </div>
+            <div class="rounded-3xl border border-gray-100 bg-white p-6 text-center shadow-sm hover:shadow-md transition">
+                <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-teal-50 text-teal-700 mx-auto">5</div>
+                <p class="mt-4 text-sm font-semibold text-gray-900">Vận hành & báo cáo</p>
+            </div>
+        </div>
+    </section>
+
+    {{-- ────────────────────────── ABOUT PACKAGE SECTION ────────────────────────── --}}
+    <section class="bg-slate-50 py-12">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+            <div class="text-center mx-auto max-w-2xl">
+                <span class="inline-flex items-center rounded-full bg-gray-100 text-teal-700 px-3 py-1 text-xs font-semibold tracking-wide">GÓI DỊCH VỤ</span>
+                <h2 class="mt-4 text-3xl sm:text-4xl font-extrabold text-gray-900">Chọn gói phù hợp với mục tiêu cho thuê của bạn</h2>
+                <p class="mt-4 text-gray-600 text-sm sm:text-base leading-relaxed">Từ gói đăng tin đến quản lý trọn gói, chúng tôi có giải pháp linh hoạt cho từng chủ nhà.</p>
+            </div>
+            <div class="mt-10 grid gap-4 md:grid-cols-3">
+                <div class="rounded-[28px] border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition">
+                    <span class="inline-flex rounded-full bg-teal-100 text-teal-700 px-3 py-1 text-xs font-semibold">Gói Cơ Bản</span>
+                    <h3 class="mt-4 text-xl font-bold text-gray-900">Đăng tin & tư vấn</h3>
+                    <ul class="mt-4 space-y-3 text-sm text-gray-500">
+                        <li>Soạn nội dung tin chuẩn</li>
+                        <li>Đăng trên nhiều kênh</li>
+                        <li>Lọc khách thuê</li>
+                    </ul>
+                    <p class="mt-6 text-sm text-gray-600">Phí một lần khi hợp đồng ký thành công.</p>
+                </div>
+                <div class="rounded-[28px] border border-teal-200 bg-teal-50 p-6 shadow-sm hover:shadow-md transition">
+                    <span class="inline-flex rounded-full bg-teal-600 text-white px-3 py-1 text-xs font-semibold">Gói Nâng Cao</span>
+                    <h3 class="mt-4 text-xl font-bold text-gray-900">Quản lý tương tác</h3>
+                    <ul class="mt-4 space-y-3 text-sm text-gray-500">
+                        <li>Hẹn xem & thương lượng</li>
+                        <li>Thông tin khách được cập nhật</li>
+                        <li>Báo cáo tiến độ định kỳ</li>
+                    </ul>
+                    <p class="mt-6 text-sm text-gray-600">Phí linh hoạt theo kết quả.</p>
+                </div>
+                <div class="rounded-[28px] border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition">
+                    <span class="inline-flex rounded-full bg-gray-100 text-teal-700 px-3 py-1 text-xs font-semibold">Gói Toàn Diện</span>
+                    <h3 class="mt-4 text-xl font-bold text-gray-900">Quản lý thuê trọn gói</h3>
+                    <ul class="mt-4 space-y-3 text-sm text-gray-500">
+                        <li>Xử lý hợp đồng & thu tiền</li>
+                        <li>Sửa chữa & bảo trì</li>
+                        <li>Báo cáo dòng tiền hàng tháng</li>
+                    </ul>
+                    <p class="mt-6 text-sm text-gray-600">Phí quản lý 5-8%/tháng.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ────────────────────────── HIGHLIGHT PROPERTIES ────────────────────────── --}}
+    <section class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 mb-14">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-6">
+            <div>
+                <h2 class="text-xl md:text-2xl font-bold text-gray-900">Tin cho thuê nổi bật</h2>
+                <p class="mt-1.5 text-gray-500 text-sm">Các căn đã xác thực, cập nhật mới nhất tại Nha Trang.</p>
+            </div>
+            <a href="{{ route('rent.list') }}" class="inline-flex items-center gap-1.5 text-teal-600 hover:text-teal-700 font-semibold text-sm group transition-colors">
+                Xem tất cả
+                <i class="fas fa-arrow-right text-xs transform group-hover:translate-x-1 transition-transform"></i>
+            </a>
+        </div>
+        
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            @forelse($properties as $property)
+                @php
+                    $isFavorited = isset($userWishlists) && in_array($property['id'], $userWishlists);
+                    $utilities = $property['utilities'] ?? [];
+                @endphp
+                <a href="{{ route('rent.detail', $property['slug']) }}"
+                   class="group relative rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm hover:shadow-lg hover:border-teal-100 transition-all duration-300 flex flex-col hover:-translate-y-0.5">
+
+                    <div class="relative w-full aspect-[4/3] overflow-hidden bg-gray-100 shrink-0">
+                        <img src="{{ $property['images'][0] ?? '/images/hero-nhatrang.jpg' }}"
+                             alt="{{ $property['title'] }}"
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+
+                        <div class="absolute top-2.5 left-2.5 flex gap-1.5 z-10">
+                            @if($property['verified'] ?? false)
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-sm text-teal-700 text-[10px] font-bold shadow-sm border border-teal-100">
+                                    <i class="fas fa-circle-check text-teal-500"></i> Đã xác thực
+                                </span>
+                            @endif
+                            @if($property['is_gold_agent'] ?? false)
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-400 text-amber-950 text-[10px] font-bold shadow-sm">
+                                    <i class="fas fa-crown text-amber-700"></i> Gold
+                                </span>
+                            @endif
+                        </div>
+
+                        <button
+                            type="button"
+                            data-property-id="{{ $property['id'] }}"
+                            data-favorited="{{ $isFavorited ? 'true' : 'false' }}"
+                            onclick="toggleFavorite(this, event)"
+                            class="favorite-btn absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200
+                                   {{ $isFavorited
+                                        ? 'bg-red-500 text-white shadow-md shadow-red-200'
+                                        : 'bg-white/80 backdrop-blur-sm text-gray-400 hover:bg-red-50 hover:text-red-400 shadow-sm' }}">
+                            <i class="{{ $isFavorited ? 'fas' : 'far' }} fa-heart text-[13px]"></i>
+                        </button>
+
+                        @if(!empty($property['distance_sea']))
+                            <div class="absolute bottom-2.5 left-2.5 z-10">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur-md text-white text-[10px] font-medium">
+                                    <i class="fas fa-water text-cyan-300 text-[9px]"></i> {{ $property['distance_sea'] }}
+                                </span>
+                            </div>
+                        @endif
+
+                        <div class="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
+                    </div>
+
+                    <div class="p-4 flex-1 flex flex-col gap-2">
+                        <div class="flex items-start justify-between gap-2">
+                            <span class="text-teal-600 font-extrabold text-base leading-tight">
+                                {{ $property['price_label'] ?? number_format($property['price']) . ' đ' }}
+                            </span>
+                            <span class="shrink-0 text-[10px] font-semibold text-teal-700 bg-teal-50 border border-teal-100 px-2 py-0.5 rounded-md mt-0.5">
+                                {{ $property['type_label'] ?? $property['type'] }}
+                            </span>
+                        </div>
+
+                        <h3 class="text-sm font-bold text-gray-900 line-clamp-2 min-h-[2.75rem] group-hover:text-teal-600 transition-colors leading-snug"
+                            title="{{ $property['title'] }}">
+                            {{ $property['title'] }}
+                        </h3>
+
+                        <p class="text-[11px] text-gray-500 flex items-center gap-1 truncate -mt-1">
+                            <i class="fas fa-map-marker-alt text-gray-400 shrink-0 text-[10px]"></i>
+                            <span class="truncate">{{ $property['location'] }}</span>
+                        </p>
+
+                        <hr class="border-gray-100 my-0.5">
+
+                        <div class="flex items-center gap-3 text-[11px] text-gray-600 font-medium">
+                            <span class="flex items-center gap-1"><i class="fas fa-bed text-gray-400 text-[10px]"></i> {{ $property['bedrooms'] }} PN</span>
+                            <span class="flex items-center gap-1"><i class="fas fa-bath text-gray-400 text-[10px]"></i> {{ $property['bathrooms'] }} WC</span>
+                            <span class="flex items-center gap-1"><i class="fas fa-vector-square text-gray-400 text-[10px]"></i> {{ $property['area'] }} m²</span>
+                        </div>
+
+                        @if(!empty($utilities))
+                            <div class="flex flex-wrap gap-1.5 mt-auto pt-1">
+                                @foreach(array_slice($utilities, 0, 3) as $util)
+                                    <span class="inline-flex items-center gap-1 bg-sky-50 text-sky-700 text-[10px] font-medium px-2 py-0.5 rounded-md border border-sky-100">
+                                        @if(!empty($util['icon'])) <i class="fas fa-{{ $util['icon'] }} text-[9px]"></i> @endif
+                                        {{ $util['name'] }}
+                                    </span>
+                                @endforeach
+                                @if(count($utilities) > 3)
+                                    <span class="inline-flex items-center bg-gray-50 text-gray-400 text-[10px] font-medium px-2 py-0.5 rounded-md border border-gray-100">
+                                        +{{ count($utilities) - 3 }}
+                                    </span>
+                                @endif
+                            </div>
+                        @else
+                            <div class="mt-auto pt-1"></div>
+                        @endif
+                    </div>
+                </a>
+            @empty
+                <div class="col-span-full py-16 text-center text-gray-400">
+                    <i class="fas fa-building text-4xl mb-3 block opacity-30"></i>
+                    Không có tin đăng nào.
+                </div>
+            @endforelse
+        </div>
+    </section>
+
+    {{-- ────────────────────────── PROJECTS SECTION ────────────────────────── --}}
+    <section class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 mb-14">
+        <div class="mb-6">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-900">Dự án trọng điểm</h2>
+            <p class="mt-1.5 text-gray-500 text-sm">Căn hộ chuẩn hóa theo từng dự án nổi bật.</p>
+        </div>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+            @foreach($projects as $proj)
+                <a href="{{ route('rent.list', ['project' => $proj['slug']]) }}" class="group relative aspect-[4/3] rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:ring-2 hover:ring-teal-400 hover:ring-offset-2 transition-all duration-300 block">
+                    <img src="{{ $proj['image'] }}" alt="{{ $proj['label'] }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    <span class="absolute bottom-4 left-4 text-white font-bold text-sm md:text-base tracking-wide drop-shadow-sm">
+                        {{ $proj['label'] }}
+                    </span>
+                </a>
+            @endforeach
+        </div>
+    </section>
+
+
+
+</div>
+
+<script>
+    function toggleFavorite(button, event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const propertyId = button.getAttribute('data-property-id');
+        const icon = button.querySelector('i');
+        const isFavorited = button.getAttribute('data-favorited') === 'true';
+
+        // Optimistic UI Update
+        if (isFavorited) {
+            button.setAttribute('data-favorited', 'false');
+            button.classList.remove('bg-red-500', 'text-white', 'shadow-md', 'shadow-red-200');
+            button.classList.add('bg-white/80', 'backdrop-blur-sm', 'text-gray-400', 'hover:bg-red-50', 'hover:text-red-400', 'shadow-sm');
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+        } else {
+            button.setAttribute('data-favorited', 'true');
+            button.classList.add('bg-red-500', 'text-white', 'shadow-md', 'shadow-red-200');
+            button.classList.remove('bg-white/80', 'backdrop-blur-sm', 'text-gray-400', 'hover:bg-red-50', 'hover:text-red-400', 'shadow-sm');
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+        }
+
+        fetch('{{ route("wishlist.toggle") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ property_id: propertyId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success && data.redirect) {
+                window.location.href = data.redirect;
+            }
+        })
+        .catch(error => console.error('Error toggling wishlist:', error));
+    }
+</script>
+
+<script>
+    let searchOpen = false;
+
+    function openSearch() {
+        if (searchOpen) return;
+        searchOpen = true;
+
+        const panel   = document.getElementById('searchFilterPanel');
+        const chevron = document.getElementById('searchChevron');
+
+        // Measure the real height so we can animate to it
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+        panel.style.opacity   = '1';
+        chevron.style.transform = 'rotate(180deg)';
+
+        // Focus the text input
+        document.getElementById('searchInput').focus();
+    }
+
+    function closeSearch() {
+        if (!searchOpen) return;
+        searchOpen = false;
+
+        const panel   = document.getElementById('searchFilterPanel');
+        const chevron = document.getElementById('searchChevron');
+
+        panel.style.maxHeight = '0';
+        panel.style.opacity   = '0';
+        chevron.style.transform = 'rotate(0deg)';
+    }
+
+    function doSearch() {
+        // TODO: wire up to actual search route
+        const q = document.getElementById('searchInput').value;
+        window.location.href = '{{ route("rent.list") }}' + (q ? '?q=' + encodeURIComponent(q) : '');
+    }
+
+    // Close when clicking outside the search container
+    document.addEventListener('click', function (e) {
+        const container = document.getElementById('searchContainer');
+        if (container && !container.contains(e.target)) {
+            closeSearch();
+        }
+    });
+
+    // Also allow Enter key to search
+    document.getElementById('searchInput').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') doSearch();
+    });
+</script>
+@endsection

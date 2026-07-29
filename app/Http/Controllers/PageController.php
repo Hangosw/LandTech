@@ -337,6 +337,14 @@ class PageController extends Controller
         $projects = $this->getProjects();
         return view('pages.projects', compact('projects'));
     }
+
+    /**
+     * Show owners page
+     */
+    public function owners(): View
+    {
+        return view('pages.owners');
+    }
     
     /**
      * Get properties data

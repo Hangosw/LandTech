@@ -60,10 +60,10 @@
                 <h4 class="font-bold text-gray-900 mb-4 text-base tracking-wide">Liên hệ</h4>
                 <ul class="space-y-3 text-sm text-muted-foreground font-medium">
                     <li class="flex items-center gap-2">
-                        <span>Hotline: 0258 888 6868</span>
+                        <span>Hotline: 0868 9797 99</span>
                     </li>
                     <li class="flex items-center gap-2">
-                        <span>Email: hello@landtek.com.vn</span>
+                        <span>Email: lienhe@landtek.com.vn</span>
                     </li>
                     <li class="flex items-center gap-2">
                         <span>TP. Nha Trang, Khánh Hòa</span>
