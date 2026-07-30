@@ -13,6 +13,8 @@ Route::get('/thue', [PageController::class, 'rentList'])->name('rent.list');
 Route::get('/thue/{slug}', [PageController::class, 'rentDetail'])->name('rent.detail');
 Route::get('/dang-tin', [PageController::class, 'postProperty'])->name('property.post');
 Route::post('/dang-tin', [PropertyController::class, 'store'])->name('property.post.submit');
+Route::post('/dang-tin/draft', [PropertyController::class, 'saveDraft'])->name('property.draft.save');
+Route::delete('/dang-tin/draft/{id}', [PropertyController::class, 'deleteDraft'])->name('property.draft.delete');
 Route::get('/quan-ly-tin-dang/{id}/edit', [PropertyController::class, 'edit'])->name('property.edit');
 Route::post('/quan-ly-tin-dang/{id}', [PropertyController::class, 'update'])->name('property.update');
 Route::get('/yeu-thich', [PageController::class, 'wishlist'])->name('wishlist');

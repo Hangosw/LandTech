@@ -184,25 +184,17 @@
                 {
                     data: null,
                     render: function(data, type, row) {
-                        var statusHtml = '';
-                        if (row.status == 'active') {
-                            statusHtml = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-xs font-semibold border border-green-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Đang hiển thị
-                                          </span>`;
-                        } else if (row.status == 'draft') {
-                            statusHtml = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Chờ duyệt
-                                          </span>`;
-                        } else if (row.status == 'sold' || row.status == 'rented') {
-                            statusHtml = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 text-gray-700 text-xs font-semibold border border-gray-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span> Đã giao dịch
-                                          </span>`;
-                        } else {
-                            var statusCap = row.status.charAt(0).toUpperCase() + row.status.slice(1);
-                            statusHtml = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 text-gray-700 text-xs font-semibold border border-gray-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span> ${statusCap}
-                                          </span>`;
-                        }
+                        const statusBadges = {
+                            'sansangchothue': `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Sẵn sàng cho thuê</span>`,
+                            'choduyet': `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Chờ duyệt</span>`,
+                            'nhap': `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200"><span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Nháp</span>`,
+                            'dachothue': `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Đã cho thuê</span>`,
+                            'taman': `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 text-gray-700 text-xs font-semibold border border-gray-200"><span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span> Tạm ẩn</span>`,
+                            'hethantin': `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Hết hạn tin</span>`,
+                            'ngungkhaithac': `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold border border-purple-200"><span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Ngừng khai thác</span>`,
+                            'bigovipham': `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 text-red-700 text-xs font-semibold border border-red-200"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Bị gỡ (vi phạm)</span>`
+                        };
+                        var statusHtml = statusBadges[row.status] || `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 text-gray-700 text-xs font-semibold border border-gray-200"><span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span> ${row.status}</span>`;
                         
                         return `
                         <div class="text-sm">

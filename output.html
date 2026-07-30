@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phòng trọ sinh viên — LANDTEK</title>
+    <meta name="description" content="phòng trọ rộng giá tốt">
+    
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="http://localhost:8000/build/assets/app-_9ujQRQg.css" /><link rel="stylesheet" href="http://localhost:8000/build/assets/app-_9ujQRQg.css" />    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+    <header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-3 flex justify-between items-center">
+
+        
+        <a href="http://localhost:8000" class="text-xl font-bold text-teal-600 shrink-0">LANDTEK</a>
+
+        
+        <nav class="hidden md:flex gap-8 items-center flex-1 justify-center">
+            <a href="http://localhost:8000/thue" class="text-gray-700 hover:text-teal-600 font-medium">Thuê nhà</a>
+            <a href="http://localhost:8000/du-an" class="text-gray-700 hover:text-teal-600 font-medium">Dự án</a>
+            <a href="http://localhost:8000/moi-gioi" class="text-gray-700 hover:text-teal-600 font-medium">Môi giới</a>
+            <a href="http://localhost:8000/yeu-thich" class="text-gray-700 hover:text-teal-600 font-medium">Yêu thích</a>
+        </nav>
+
+        
+        <div class="flex items-center gap-2">
+
+            
+            <a href="http://localhost:8000/dang-tin"
+               class="hdr-btn-post inline-flex items-center justify-center gap-1.5 font-semibold transition-all duration-200 shrink-0
+                      bg-gradient-to-br from-teal-500 to-teal-700 text-white
+                      hover:from-teal-400 hover:to-teal-600 active:scale-95">
+                <i class="fas fa-plus" style="font-size:12px;"></i>
+                <span class="hdr-post-label">Đăng tin</span>
+            </a>
+
+                            
+                <a href="http://localhost:8000/dang-nhap" class="hdr-btn-login inline-flex items-center justify-center gap-1.5 shrink-0 font-semibold transition-all duration-200 active:scale-95">
+                    <i class="fas fa-circle-user" style="font-size:15px;"></i>
+                    <span class="hdr-login-label">Đăng nhập</span>
+                </a>
+            
+            
+            <button id="mob-menu-btn"
+                    class="hdr-btn-menu md:hidden flex items-center justify-center shrink-0 transition-all duration-200 active:scale-95"
+                    onclick="openMobMenu()"
+                    aria-label="Mở menu">
+                <i class="fas fa-bars" style="font-size:13px;"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+
+
+
+<div id="mob-drawer-backdrop"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1001;"
+     onclick="closeMobMenu()"></div>
+
+
+<div id="mob-drawer"
+     style="position:fixed; top:0; left:0; height:100%; width:288px; max-width:85vw;
+            background:#fff; z-index:1002; display:flex; flex-direction:column;
+            transform:translateX(-100%); transition:transform 0.28s cubic-bezier(.4,0,.2,1);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.18);">
+
+    
+    <div style="display:flex; align-items:center; justify-content:space-between;
+                padding:16px 20px; border-bottom:1px solid #f3f4f6; flex-shrink:0;">
+        <span style="font-size:18px; font-weight:800; color:#0d9488;">LANDTEK</span>
+        <button onclick="closeMobMenu()"
+                style="width:32px; height:32px; border-radius:50%; border:none; background:#f3f4f6;
+                       color:#6b7280; font-size:14px; cursor:pointer; display:flex;
+                       align-items:center; justify-content:center; transition:background .2s;"
+                onmouseover="this.style.background='#e5e7eb'"
+                onmouseout="this.style.background='#f3f4f6'">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    
+    
+    
+    <nav style="flex:1; overflow-y:auto; padding:8px 0;">
+
+        <a href="http://localhost:8000/thue" class="mob-drawer-link">
+            <i class="fas fa-home" style="color:#0d9488; width:18px;"></i> Thuê nhà
+        </a>
+        <a href="http://localhost:8000/du-an" class="mob-drawer-link">
+            <i class="fas fa-building" style="color:#0d9488; width:18px;"></i> Dự án
+        </a>
+        <a href="http://localhost:8000/moi-gioi" class="mob-drawer-link">
+            <i class="fas fa-user-tie" style="color:#0d9488; width:18px;"></i> Môi giới
+        </a>
+        <a href="http://localhost:8000/yeu-thich" class="mob-drawer-link">
+            <i class="fas fa-heart" style="color:#0d9488; width:18px;"></i> Yêu thích
+        </a>
+
+        <div style="margin:8px 20px; border-top:1px solid #f3f4f6;"></div>
+
+        <a href="http://localhost:8000/dang-tin" class="mob-drawer-link" style="color:#0d9488; font-weight:700;">
+            <i class="fas fa-plus-circle" style="color:#0d9488; width:18px;"></i> Đăng tin
+        </a>
+
+                    <div style="margin:8px 20px; border-top:1px solid #f3f4f6;"></div>
+            <a href="http://localhost:8000/dang-nhap" class="mob-drawer-link">
+                <i class="fas fa-user" style="color:#9ca3af; width:18px;"></i> Đăng nhập
+            </a>
+            </nav>
+
+    
+    <div style="padding:14px 20px; border-top:1px solid #f3f4f6; background:#f9fafb; flex-shrink:0;">
+        <p style="font-size:11px; color:#9ca3af; text-align:center;">© 2026 LANDTEK — Nha Trang</p>
+    </div>
+</div>
+
+<style>
+/* ── Header action buttons ─────────────────────────────── */
+
+/* Primary CTA: Đăng tin — desktop: pill có label */
+.hdr-btn-post {
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgba(13,148,136,0.28);
+    font-size: 13.5px;
+    text-decoration: none;
+}
+.hdr-btn-post:hover {
+    box-shadow: 0 4px 16px rgba(13,148,136,0.38);
+}
+.hdr-post-label {
+    font-size: 13.5px;
+    letter-spacing: 0.01em;
+}
+
+/* Ghost button: Đăng nhập — desktop: pill có label */
+.hdr-btn-login {
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1.5px solid #e2e8f0;
+    background: transparent;
+    color: #374151;
+    font-size: 13.5px;
+    text-decoration: none;
+}
+.hdr-btn-login:hover {
+    border-color: #0d9488;
+    background: #f0fdfa;
+    color: #0d9488;
+}
+.hdr-login-label {
+    font-size: 13.5px;
+}
+
+/* Avatar circle button */
+.hdr-avatar-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    color: #374151;
+}
+.hdr-avatar-btn:hover {
+    border-color: #0d9488;
+    background: #f0fdfa;
+    color: #0d9488;
+}
+
+/* Hamburger button */
+.hdr-btn-menu {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    color: #374151;
+}
+.hdr-btn-menu:hover {
+    border-color: #0d9488;
+    background: #f0fdfa;
+    color: #0d9488;
+}
+
+/* ── Mobile (≤ 767px): icon-only, giống ảnh tham chiếu ── */
+@media (max-width: 767px) {
+    /* Đăng tin: teal CIRCLE, chỉ icon +, ẩn label */
+    .hdr-btn-post {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        border-radius: 50%;
+        box-shadow: 0 2px 10px rgba(13,148,136,0.30);
+    }
+    .hdr-post-label {
+        display: none;
+    }
+    /* Đăng nhập: icon-only square bo góc, ẩn label */
+    .hdr-btn-login {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        border-radius: 11px;
+        background: #f8fafc;
+    }
+    .hdr-login-label {
+        display: none;
+    }
+    /* Avatar và hamburger giữ kích thước nhất quán */
+    .hdr-avatar-btn {
+        width: 38px;
+        height: 38px;
+    }
+    .hdr-btn-menu {
+        width: 38px;
+        height: 38px;
+    }
+}
+
+/* ── Drawer links ─────────────────────────────────────── */
+.mob-drawer-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 20px;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s;
+}
+.mob-drawer-link:hover {
+    background: #f0fdfa;
+    color: #0d9488;
+}
+</style>
+
+<script>
+function openMobMenu() {
+    document.getElementById('mob-drawer').style.transform = 'translateX(0)';
+    document.getElementById('mob-drawer-backdrop').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    // Ẩn bottom bar nếu có
+    const bar = document.getElementById('mobBottomBar');
+    if (bar) bar.style.display = 'none';
+}
+function closeMobMenu() {
+    document.getElementById('mob-drawer').style.transform = 'translateX(-100%)';
+    document.getElementById('mob-drawer-backdrop').style.display = 'none';
+    document.body.style.overflow = '';
+    // Hiện lại bottom bar
+    const bar = document.getElementById('mobBottomBar');
+    if (bar) bar.style.display = '';
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeMobMenu();
+});
+</script>
+    
+    <main class="flex-1">
+        
+
+<style>
+/* ── Mobile carousel ── */
+.mob-carousel {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+}
+.mob-carousel-track {
+    display: flex;
+    height: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.mob-carousel-track::-webkit-scrollbar { display: none; }
+.mob-carousel-slide {
+    min-width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    position: relative;
+}
+.mob-carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.mob-carousel-dots {
+    position: absolute;
+    bottom: 44px;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    pointer-events: none;
+    z-index: 10;
+}
+.mob-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.45);
+    transition: all .25s;
+}
+.mob-dot.active {
+    background: #fff;
+    width: 16px;
+    border-radius: 4px;
+}
+.mob-carousel-count {
+    position: absolute;
+    bottom: 12px;
+    right: 14px;
+    background: rgba(0,0,0,.45);
+    color: #fff;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 12px;
+    z-index: 10;
+}
+.mob-carousel-appbar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 12px;
+    z-index: 20;
+    pointer-events: none;
+}
+.mob-appbar-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: rgba(15,52,96,.55);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 14px;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: background .2s;
+}
+.mob-appbar-btn:hover { background: rgba(15,52,96,.8); }
+.mob-appbar-right { display: flex; gap: 8px; }
+
+/* ── Mobile price block ── */
+@media (max-width: 1023px) {
+    .mob-price-block {
+        padding: 14px 16px 10px;
+        border-bottom: 6px solid #f3f4f6;
+    }
+    .mob-price-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+    }
+    .mob-price-big {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0F3460;
+    }
+    .mob-price-badge {
+        font-size: 10px;
+        font-weight: 700;
+        color: #16a34a;
+        background: #dcfce7;
+        padding: 3px 8px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+    .mob-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1.4;
+        margin-bottom: 5px;
+    }
+    .mob-addr {
+        font-size: 12.5px;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .mob-stats-row {
+        display: flex;
+        gap: 0;
+        margin-top: 12px;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 12px;
+    }
+    .mob-stat-item {
+        flex: 1;
+        text-align: center;
+    }
+    .mob-stat-val {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0F3460;
+    }
+    .mob-stat-lbl {
+        font-size: 10.5px;
+        color: #6b7280;
+        margin-top: 2px;
+    }
+    .mob-stat-sep {
+        width: 1px;
+        background: #e5e7eb;
+        margin: 2px 8px;
+    }
+}
+
+/* ── Mobile section header ── */
+@media (max-width: 1023px) {
+    .mob-section {
+        padding: 16px 16px;
+        border-bottom: 6px solid #f3f4f6;
+    }
+    .mob-section:last-child { border-bottom: none; }
+    .mob-section-title {
+        font-size: 13.5px;
+        color: #0F3460;
+        font-weight: 700;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+    }
+}
+
+/* ── Spec grid ── */
+@media (max-width: 1023px) {
+    .mob-spec-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 12px;
+    }
+    .mob-spec-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .mob-spec-icon {
+        width: 28px; height: 28px;
+        border-radius: 8px;
+        background: #ebf3ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+    .mob-spec-lbl {
+        font-size: 11px;
+        color: #6b7280;
+    }
+    .mob-spec-val {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+}
+
+/* ── Chips ── */
+@media (max-width: 1023px) {
+    .mob-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .mob-chip {
+        font-size: 11.5px;
+        color: #0F3460;
+        background: #ebf3ff;
+        padding: 7px 12px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+    }
+}
+
+/* ── Description clamp ── */
+@media (max-width: 1023px) {
+    .mob-desc-text {
+        font-size: 12.5px;
+        color: #1f2937;
+        line-height: 1.65;
+    }
+    .mob-desc-text.mob-clamped {
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .mob-see-more-btn {
+        margin-top: 8px;
+        background: none;
+        border: none;
+        color: #1A56A8;
+        font-size: 12.5px;
+        font-weight: 700;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        cursor: pointer;
+    }
+}
+
+/* ── Map placeholder ── */
+@media (max-width: 1023px) {
+    .mob-map-box {
+        height: 120px;
+        border-radius: 12px;
+        background:
+            linear-gradient(0deg, rgba(26,86,168,.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(26,86,168,.08) 1px, transparent 1px), #eef2f8;
+        background-size: 20px 20px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: opacity .2s;
+        overflow: hidden;
+    }
+    .mob-map-box:hover { opacity: .85; }
+    .mob-map-pin { font-size: 28px; }
+    .mob-map-label {
+        position: absolute;
+        bottom: 8px; left: 8px;
+        background: #fff;
+        font-size: 10.5px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        color: #0F3460;
+        font-weight: 600;
+        box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    }
+}
+
+/* ── Agent card mobile ── */
+@media (max-width: 1023px) {
+    .mob-agent-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .mob-avatar {
+        width: 44px; height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    .mob-agent-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    .mob-agent-sub {
+        font-size: 11px;
+        color: #6b7280;
+        margin-top: 1px;
+    }
+    .mob-agent-badge {
+        font-size: 9.5px;
+        background: #fef3c7;
+        color: #92400e;
+        padding: 2px 6px;
+        border-radius: 5px;
+        font-weight: 700;
+        margin-left: 4px;
+    }
+    .mob-schedule-btn {
+        width: 100%;
+        margin-top: 12px;
+        background: #ebf3ff;
+        color: #1A56A8;
+        border: 1px solid #c7d9f0;
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background .2s;
+    }
+    .mob-schedule-btn:hover { background: #dbeafe; }
+}
+
+/* ── Similar horizontal scroll ── */
+@media (max-width: 1023px) {
+    .mob-similar-scroll {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+    }
+    .mob-similar-scroll::-webkit-scrollbar { display: none; }
+    .mob-sim-card {
+        min-width: 145px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        flex-shrink: 0;
+        text-decoration: none;
+        display: block;
+        background: #fff;
+        transition: box-shadow .2s;
+    }
+    .mob-sim-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+    .mob-sim-img {
+        height: 90px;
+        overflow: hidden;
+        background: #dbeafe;
+    }
+    .mob-sim-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .mob-sim-body { padding: 8px; }
+    .mob-sim-price {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0F3460;
+    }
+    .mob-sim-title {
+        font-size: 10.5px;
+        color: #1f2937;
+        margin-top: 2px;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+/* ── Sticky bottom bar ── */
+@media (max-width: 1023px) {
+    .mob-bottom-bar {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        z-index: 999;
+        background: #fff;
+        border-top: 1px solid #e5e7eb;
+        padding: 10px 14px;
+        padding-bottom: max(14px, env(safe-area-inset-bottom));
+        display: flex;
+        gap: 10px;
+        box-shadow: 0 -4px 12px rgba(0,0,0,.06);
+    }
+    .mob-btn-save {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+        background: #fff;
+        cursor: pointer;
+        transition: all .2s;
+        color: #6b7280;
+    }
+    .mob-btn-save:hover, .mob-btn-save.saved {
+        border-color: #fca5a5;
+        color: #ef4444;
+    }
+    .mob-btn-call {
+        flex: 1; height: 44px;
+        border-radius: 12px;
+        border: none;
+        font-size: 13px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        background: #0d9488;
+        color: #fff;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity .2s;
+    }
+    .mob-btn-call:hover { opacity: .88; color: #fff; }
+    .mob-btn-zalo {
+        flex: 1; height: 44px;
+        border-radius: 12px;
+        border: 1.5px solid #99f6e4;
+        font-size: 13px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        background: #f0fdfa;
+        color: #0f766e;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background .2s;
+    }
+    .mob-btn-zalo:hover { background: #ccfbf1; }
+    /* Push content above sticky bar */
+    .mob-bottom-spacer { height: 80px; }
+}
+@media (min-width: 1024px) {
+    .mob-only { display: none !important; }
+    .mob-bottom-bar { display: none !important; }
+}
+</style>
+
+
+<div class="bg-white border-b border-gray-100 py-3">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <nav class="flex items-center gap-1.5 text-xs text-gray-500">
+            <a href="http://localhost:8000" class="hover:text-teal-600 transition-colors">Trang chủ</a>
+            <i class="fas fa-chevron-right text-[9px] text-gray-300"></i>
+            <a href="http://localhost:8000/thue" class="hover:text-teal-600 transition-colors">Thuê nhà</a>
+                            <i class="fas fa-chevron-right text-[9px] text-gray-300"></i>
+                <span class="text-gray-800 font-medium">Phước Hải</span>
+                    </nav>
+    </div>
+</div>
+
+
+<div class="lg:hidden mob-only" id="mob-layout">
+
+    
+    <div class="mob-carousel" id="mobCarousel">
+
+        
+        <div class="mob-carousel-appbar">
+            <a href="http://localhost:8000/thue" class="mob-appbar-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="mob-appbar-right">
+                <button class="mob-appbar-btn" id="mob-wishlist-appbar" onclick="mobToggleWishlist()">♡</button>
+                <button class="mob-appbar-btn" onclick="mobShare()">
+                    <i class="fas fa-share-alt" style="font-size:13px"></i>
+                </button>
+            </div>
+        </div>
+
+        
+        <div class="mob-carousel-track" id="mobTrack">
+                            <div class="mob-carousel-slide">
+                    <img src="/AnhDuAn/cover_6a48f7f62ad1d.jpg" alt="Ảnh 1" loading="eager">
+                </div>
+                            <div class="mob-carousel-slide">
+                    <img src="/AnhDuAn/media_6a48f7f62c0df.jfif" alt="Ảnh 2" loading="lazy">
+                </div>
+                    </div>
+
+        
+        <div class="mob-carousel-dots" id="mobDots">
+                            <div class="mob-dot active"></div>
+                            <div class="mob-dot "></div>
+                    </div>
+
+        
+        <div class="mob-carousel-count" id="mobCounter">1/2</div>
+    </div>
+
+    
+    <div class="mob-price-block">
+        <div class="mob-price-row">
+            <span class="mob-price-big">2 triệu/tháng</span>
+            <span class="mob-price-badge">✓ Đã xác thực</span>
+        </div>
+        <div class="mob-title">Phòng trọ sinh viên</div>
+        <div class="mob-addr">
+            <span>📍</span>
+            <span>Phước Hải, Nha Trang, Phước Hải, Nha Trang</span>
+        </div>
+
+        
+        <div class="mob-stats-row">
+            <div class="mob-stat-item">
+                <div class="mob-stat-val">30 m²</div>
+                <div class="mob-stat-lbl">Diện tích</div>
+            </div>
+            <div class="mob-stat-sep"></div>
+            <div class="mob-stat-item">
+                <div class="mob-stat-val">2</div>
+                <div class="mob-stat-lbl">Phòng ngủ</div>
+            </div>
+            <div class="mob-stat-sep"></div>
+            <div class="mob-stat-item">
+                <div class="mob-stat-val">2</div>
+                <div class="mob-stat-lbl">WC</div>
+            </div>
+                    </div>
+    </div>
+
+    
+    <div class="mob-section">
+        <div class="mob-section-title">Đặc điểm bất động sản</div>
+        <div class="mob-spec-grid">
+            <div class="mob-spec-item">
+                <div class="mob-spec-icon">📐</div>
+                <div>
+                    <div class="mob-spec-lbl">Diện tích</div>
+                    <div class="mob-spec-val">30 m²</div>
+                </div>
+            </div>
+                        <div class="mob-spec-item">
+                <div class="mob-spec-icon">🛏️</div>
+                <div>
+                    <div class="mob-spec-lbl">Phòng ngủ</div>
+                    <div class="mob-spec-val">2 phòng</div>
+                </div>
+            </div>
+                                    <div class="mob-spec-item">
+                <div class="mob-spec-icon">🚿</div>
+                <div>
+                    <div class="mob-spec-lbl">Phòng tắm</div>
+                    <div class="mob-spec-val">2 phòng</div>
+                </div>
+            </div>
+                        <div class="mob-spec-item">
+                <div class="mob-spec-icon">🏠</div>
+                <div>
+                    <div class="mob-spec-lbl">Loại BĐS</div>
+                    <div class="mob-spec-val">Căn hộ</div>
+                </div>
+            </div>
+                        <div class="mob-spec-item">
+                <div class="mob-spec-icon">📋</div>
+                <div>
+                    <div class="mob-spec-lbl">Hình thức</div>
+                    <div class="mob-spec-val">Cho thuê</div>
+                </div>
+            </div>
+                                                            <div class="mob-spec-item">
+                <div class="mob-spec-icon">🏗️</div>
+                <div>
+                    <div class="mob-spec-lbl">Dự án</div>
+                    <div class="mob-spec-val">vinpearl</div>
+                </div>
+            </div>
+                    </div>
+    </div>
+
+    
+        <div class="mob-section">
+        <div class="mob-section-title">Mô tả</div>
+        <div class="mob-desc-text mob-clamped" id="mobDescText">
+            phòng trọ rộng giá tốt
+        </div>
+        <button class="mob-see-more-btn" id="mobSeeMoreBtn" onclick="mobToggleDesc()">
+            Xem thêm <span id="mobSeeMoreIcon">⌄</span>
+        </button>
+    </div>
+    
+    
+        <div class="mob-section">
+        <div class="mob-section-title">Tiện ích</div>
+        <div class="mob-chips">
+                            <div class="mob-chip">
+                                            <i class="fas fa-wifi" style="font-size:12px"></i>
+                                        Wifi mạnh
+                </div>
+                            <div class="mob-chip">
+                                            <i class="fas fa-elevator" style="font-size:12px"></i>
+                                        Thang máy
+                </div>
+                    </div>
+    </div>
+    
+    
+    <div class="mob-section">
+        <div class="mob-section-title">Vị trí</div>
+                    
+            <div class="mob-map-box"
+                 onclick="window.open('https://maps.google.com/?q=Ph%C6%B0%E1%BB%9Bc+H%E1%BA%A3i%2C+Nha+Trang+Ph%C6%B0%E1%BB%9Bc+H%E1%BA%A3i%2C+Nha+Trang', '_blank')">
+                <span class="mob-map-pin">📍</span>
+                <span class="mob-map-label">Chạm để mở bản đồ</span>
+            </div>
+            </div>
+
+    
+    <div class="mob-section">
+        <div class="mob-section-title">Môi giới</div>
+        <div class="mob-agent-row">
+            <div class="mob-avatar">S</div>
+            <div style="flex:1">
+                <div class="mob-agent-name">
+                    Super Admin
+                    <span class="mob-agent-badge">SILVER</span>
+                </div>
+                <div class="mob-agent-sub">
+                                            1 lượt xem ·
+                                        Phản hồi nhanh
+                </div>
+            </div>
+        </div>
+        <button class="mob-schedule-btn" onclick="document.getElementById('mob-booking-modal').classList.remove('hidden')">
+            🗓️ Đặt lịch xem nhà
+        </button>
+    </div>
+
+    
+    
+    
+    <div class="mob-bottom-spacer"></div>
+</div>
+
+
+
+<div class="bg-gray-50 min-h-screen hidden lg:block">
+<div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6">
+
+
+<div class="mb-6">
+    
+    <div class="hidden lg:flex gap-3" style="height:390px">
+
+        
+        <div class="relative flex-1 min-w-0 rounded-2xl overflow-hidden bg-gray-200 cursor-pointer"
+             onclick="openGallery(currentMainIdx)">
+            <img id="main-gallery-img"
+                 src="/AnhDuAn/cover_6a48f7f62ad1d.jpg"
+                 alt="Phòng trọ sinh viên"
+                 class="w-full h-full object-cover transition-all duration-400 hover:scale-[1.02]">
+        </div>
+
+        
+        <div class="shrink-0 grid grid-cols-2 gap-2.5" style="width:268px; grid-template-rows:1fr 1fr">
+                            <div class="relative rounded-xl overflow-hidden bg-gray-200 cursor-pointer group thumbnail-wrap
+                            ring-[2.5px] ring-teal-400 ring-offset-1"
+                     data-idx="0"
+                     onclick="switchMain(this, 0)">
+                    <img src="/AnhDuAn/cover_6a48f7f62ad1d.jpg" alt="Ảnh 1"
+                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                    </div>
+                            <div class="relative rounded-xl overflow-hidden bg-gray-200 cursor-pointer group thumbnail-wrap
+                            "
+                     data-idx="1"
+                     onclick="switchMain(this, 1)">
+                    <img src="/AnhDuAn/media_6a48f7f62c0df.jfif" alt="Ảnh 2"
+                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                    </div>
+                        
+                            <div class="rounded-xl bg-gray-100 border-2 border-dashed border-gray-200 flex items-center justify-center">
+                    <i class="fas fa-image text-gray-300 text-xl"></i>
+                </div>
+                            <div class="rounded-xl bg-gray-100 border-2 border-dashed border-gray-200 flex items-center justify-center">
+                    <i class="fas fa-image text-gray-300 text-xl"></i>
+                </div>
+                    </div>
+    </div>
+</div>
+
+
+<div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 items-start">
+
+    
+    <div>
+
+        
+        <div class="flex flex-wrap gap-2 mb-3">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-100 text-teal-700 text-xs font-semibold">
+                <i class="fas fa-circle-check text-teal-500 text-[10px]"></i> Tin đã xác thực
+            </span>
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">
+                Căn hộ
+            </span>
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-medium">
+                    <i class="fas fa-eye text-[10px]"></i> 1 lượt xem
+                </span>
+                    </div>
+
+        
+        <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-2">
+            Phòng trọ sinh viên
+        </h1>
+
+        
+        <p class="flex items-center gap-1.5 text-sm text-gray-500 mb-5">
+            <i class="fas fa-map-marker-alt text-teal-500 text-xs"></i>
+            Phước Hải, Nha Trang, Phước Hải, Nha Trang
+        </p>
+
+        
+        <div class="flex items-baseline gap-2 mb-6">
+            <span class="text-3xl font-extrabold text-teal-600">2 triệu</span>
+                            <span class="text-gray-500 text-base font-normal">/ tháng</span>
+                    </div>
+
+        
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+            <div class="flex flex-col items-center justify-center bg-white rounded-xl border border-gray-100 shadow-sm py-4 px-2 gap-2">
+                <i class="fas fa-bed text-teal-500 text-xl"></i>
+                <span class="text-sm font-semibold text-gray-700 text-center">2 phòng ngủ</span>
+            </div>
+            <div class="flex flex-col items-center justify-center bg-white rounded-xl border border-gray-100 shadow-sm py-4 px-2 gap-2">
+                <i class="fas fa-bath text-teal-500 text-xl"></i>
+                <span class="text-sm font-semibold text-gray-700 text-center">2 phòng tắm</span>
+            </div>
+            <div class="flex flex-col items-center justify-center bg-white rounded-xl border border-gray-100 shadow-sm py-4 px-2 gap-2">
+                <i class="fas fa-vector-square text-teal-500 text-xl"></i>
+                <span class="text-sm font-semibold text-gray-700 text-center">30 m²</span>
+            </div>
+                    </div>
+
+        
+        <div class="flex flex-wrap gap-3 mb-8 pb-8 border-b border-gray-200">
+            <button id="btn-wishlist"
+                    onclick="toggleWishlist(this)"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:border-red-300 hover:text-red-500 font-medium text-sm transition-all shadow-sm">
+                <i class="far fa-heart"></i> Lưu tin
+            </button>
+            <button onclick="shareProperty()"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:border-teal-400 hover:text-teal-600 font-medium text-sm transition-all shadow-sm">
+                <i class="fas fa-share-alt"></i> Chia sẻ
+            </button>
+        </div>
+
+        
+                    <div class="mb-8">
+                <h2 class="text-lg font-bold text-gray-900 mb-3">Mô tả</h2>
+                <div class="text-gray-600 text-sm leading-relaxed" id="desc-content">
+                    phòng trọ rộng giá tốt
+                                    </div>
+            </div>
+        
+        
+                    <div class="mb-8">
+                <h2 class="text-lg font-bold text-gray-900 mb-3">Tiện ích</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-4">
+                                            <div class="flex items-center gap-2 text-sm text-gray-700">
+                            <i class="fas fa-check text-teal-500 shrink-0 text-xs"></i>
+                            <span>Wifi mạnh</span>
+                        </div>
+                                            <div class="flex items-center gap-2 text-sm text-gray-700">
+                            <i class="fas fa-check text-teal-500 shrink-0 text-xs"></i>
+                            <span>Thang máy</span>
+                        </div>
+                                    </div>
+            </div>
+        
+        
+        
+    </div>
+
+    
+    <aside class="space-y-4 lg:sticky lg:top-6">
+
+        
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white text-lg font-bold shrink-0 shadow">
+                    S
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-900 leading-tight">Super Admin</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Silver Agent</p>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <a href="tel:0965240289"
+                   class="flex items-center justify-center gap-2 w-full bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm py-2.5 rounded-xl transition-colors shadow-sm">
+                    <i class="fas fa-phone text-sm"></i>
+                    Hotline: 0965240289
+                </a>
+                <a href="https://zalo.me/0965240289" target="_blank"
+                   class="flex items-center justify-center gap-2 w-full border border-gray-200 hover:border-teal-400 hover:text-teal-600 text-gray-700 font-semibold text-sm py-2.5 rounded-xl transition-all">
+                    <i class="fas fa-comment-dots text-sm"></i> Zalo
+                </a>
+            </div>
+        </div>
+
+        
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div class="flex items-center gap-2 mb-1">
+                <i class="far fa-calendar-check text-teal-500"></i>
+                <h3 class="text-sm font-bold text-gray-900">Đặt lịch xem nhà</h3>
+            </div>
+            <p class="text-xs text-gray-400 mb-4 leading-relaxed">Chọn ngày trống và khung giờ phù hợp.</p>
+
+            
+            <div class="overflow-x-auto -mx-1 pb-0.5 mb-4">
+                <div class="flex gap-2 px-1 w-max">
+                                                                                        <button type="button"
+                                onclick="selectDate(this,'2026-07-30')"
+                                data-date="2026-07-30"
+                                class="date-btn shrink-0 flex flex-col items-center w-11 py-2.5 rounded-xl border text-xs font-medium transition-all
+                                       bg-teal-600 border-teal-600 text-white">
+                            <span class="text-[9px] font-normal opacity-75 uppercase">T5</span>
+                            <span class="text-sm font-bold mt-0.5">30</span>
+                            <span class="text-[9px] opacity-75">Jul</span>
+                        </button>
+                                                                    <button type="button"
+                                onclick="selectDate(this,'2026-07-31')"
+                                data-date="2026-07-31"
+                                class="date-btn shrink-0 flex flex-col items-center w-11 py-2.5 rounded-xl border text-xs font-medium transition-all
+                                       border-gray-200 text-gray-600 hover:border-teal-400 hover:text-teal-600">
+                            <span class="text-[9px] font-normal opacity-75 uppercase">T6</span>
+                            <span class="text-sm font-bold mt-0.5">31</span>
+                            <span class="text-[9px] opacity-75">Jul</span>
+                        </button>
+                                                                    <button type="button"
+                                onclick="selectDate(this,'2026-08-01')"
+                                data-date="2026-08-01"
+                                class="date-btn shrink-0 flex flex-col items-center w-11 py-2.5 rounded-xl border text-xs font-medium transition-all
+                                       border-gray-200 text-gray-600 hover:border-teal-400 hover:text-teal-600">
+                            <span class="text-[9px] font-normal opacity-75 uppercase">T7</span>
+                            <span class="text-sm font-bold mt-0.5">01</span>
+                            <span class="text-[9px] opacity-75">Aug</span>
+                        </button>
+                                                                    <button type="button"
+                                onclick="selectDate(this,'2026-08-02')"
+                                data-date="2026-08-02"
+                                class="date-btn shrink-0 flex flex-col items-center w-11 py-2.5 rounded-xl border text-xs font-medium transition-all
+                                       border-gray-200 text-gray-600 hover:border-teal-400 hover:text-teal-600">
+                            <span class="text-[9px] font-normal opacity-75 uppercase">CN</span>
+                            <span class="text-sm font-bold mt-0.5">02</span>
+                            <span class="text-[9px] opacity-75">Aug</span>
+                        </button>
+                                                                    <button type="button"
+                                onclick="selectDate(this,'2026-08-03')"
+                                data-date="2026-08-03"
+                                class="date-btn shrink-0 flex flex-col items-center w-11 py-2.5 rounded-xl border text-xs font-medium transition-all
+                                       border-gray-200 text-gray-600 hover:border-teal-400 hover:text-teal-600">
+                            <span class="text-[9px] font-normal opacity-75 uppercase">T2</span>
+                            <span class="text-sm font-bold mt-0.5">03</span>
+                            <span class="text-[9px] opacity-75">Aug</span>
+                        </button>
+                                                                    <button type="button"
+                                onclick="selectDate(this,'2026-08-04')"
+                                data-date="2026-08-04"
+                                class="date-btn shrink-0 flex flex-col items-center w-11 py-2.5 rounded-xl border text-xs font-medium transition-all
+                                       border-gray-200 text-gray-600 hover:border-teal-400 hover:text-teal-600">
+                            <span class="text-[9px] font-normal opacity-75 uppercase">T3</span>
+                            <span class="text-sm font-bold mt-0.5">04</span>
+                            <span class="text-[9px] opacity-75">Aug</span>
+                        </button>
+                                                                    <button type="button"
+                                onclick="selectDate(this,'2026-08-05')"
+                                data-date="2026-08-05"
+                                class="date-btn shrink-0 flex flex-col items-center w-11 py-2.5 rounded-xl border text-xs font-medium transition-all
+                                       border-gray-200 text-gray-600 hover:border-teal-400 hover:text-teal-600">
+                            <span class="text-[9px] font-normal opacity-75 uppercase">T4</span>
+                            <span class="text-sm font-bold mt-0.5">05</span>
+                            <span class="text-[9px] opacity-75">Aug</span>
+                        </button>
+                                    </div>
+            </div>
+
+            
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                                                                        <button type="button"
+                            onclick="selectTime(this,'09:00')"
+                            class="time-btn py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-teal-400 hover:text-teal-600 text-xs font-medium transition-all">
+                        09:00
+                    </button>
+                                                        <button type="button"
+                            onclick="selectTime(this,'10:30')"
+                            class="time-btn py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-teal-400 hover:text-teal-600 text-xs font-medium transition-all">
+                        10:30
+                    </button>
+                                                        <button type="button"
+                            onclick="selectTime(this,'14:00')"
+                            class="time-btn py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-teal-400 hover:text-teal-600 text-xs font-medium transition-all">
+                        14:00
+                    </button>
+                                                        <button type="button"
+                            onclick="selectTime(this,'15:30')"
+                            class="time-btn py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-teal-400 hover:text-teal-600 text-xs font-medium transition-all">
+                        15:30
+                    </button>
+                                                        <button type="button"
+                            onclick="selectTime(this,'17:00')"
+                            class="time-btn py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-teal-400 hover:text-teal-600 text-xs font-medium transition-all">
+                        17:00
+                    </button>
+                            </div>
+
+            
+            <form id="booking-form" class="space-y-3">
+                <input type="hidden" name="_token" value="" autocomplete="off">                <input type="hidden" name="property_id" value="19">
+                <input type="hidden" name="booking_date" id="booking_date" value="2026-07-30">
+                <input type="hidden" name="booking_time" id="booking_time" value="">
+                <input type="text" name="contact_name" placeholder="Họ tên của bạn" value=""
+                       class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-teal-400 transition-colors placeholder-gray-400">
+                <input type="tel" name="contact_phone" placeholder="Số điện thoại" value=""
+                       class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-teal-400 transition-colors placeholder-gray-400">
+                <button type="submit"
+                        class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl text-sm transition-colors shadow-sm">
+                    Gửi yêu cầu đặt lịch
+                </button>
+            </form>
+        </div>
+
+    </aside>
+
+</div>
+
+
+
+</div>
+</div>
+
+
+<div id="gallery-modal" class="fixed inset-0 z-50 bg-black/92 hidden items-center justify-center"
+     onclick="if(event.target===this) closeGallery()">
+    <button onclick="closeGallery()"
+            class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xl transition">
+        <i class="fas fa-times"></i>
+    </button>
+    <button onclick="prevImg()"
+            class="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xl transition">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <button onclick="nextImg()"
+            class="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xl transition">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+    <div class="max-w-4xl w-full px-16 md:px-20" onclick="event.stopPropagation()">
+        <img id="modal-img" src="" alt="Gallery"
+             class="w-full max-h-[82vh] object-contain rounded-xl">
+        <p id="modal-counter" class="text-center text-white/50 text-sm mt-3 font-medium"></p>
+    </div>
+</div>
+
+
+<div class="mob-bottom-bar lg:hidden" id="mobBottomBar">
+    <button class="mob-btn-save" id="mobSaveBtn" onclick="mobToggleWishlist()" title="Lưu tin">
+        <span id="mobSaveIcon">♡</span>
+    </button>
+    <a href="tel:0965240289" class="mob-btn-call">
+        📞 Gọi điện
+    </a>
+    <a href="https://zalo.me/0965240289" target="_blank" class="mob-btn-zalo">
+        💬 Chat Zalo
+    </a>
+</div>
+
+
+<div id="mob-booking-modal" class="hidden lg:hidden fixed inset-0 z-[1000] flex items-end">
+    
+    <div class="absolute inset-0 bg-black/50" onclick="document.getElementById('mob-booking-modal').classList.add('hidden')"></div>
+
+    
+    <div class="relative w-full bg-white rounded-t-2xl p-5 pb-safe z-10" style="max-height:90vh; overflow-y:auto; padding-bottom: max(20px, env(safe-area-inset-bottom));">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-900 text-base">🗓️ Đặt lịch xem nhà</h3>
+            <button onclick="document.getElementById('mob-booking-modal').classList.add('hidden')"
+                    style="width:32px;height:32px;border-radius:50%;background:#f3f4f6;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+
+        
+        <div style="overflow-x:auto;margin-bottom:16px;">
+            <div style="display:flex;gap:8px;width:max-content;">
+                                                        <button type="button"
+                            onclick="mobSelectDate(this,'2026-07-30')"
+                            data-date="2026-07-30"
+                            style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;width:44px;padding:10px 0;border-radius:12px;border:1px solid #0d9488;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                            class="mob-date-btn">
+                        <span style="font-size:9px;opacity:.75;text-transform:uppercase;">T5</span>
+                        <span style="font-size:14px;font-weight:800;margin-top:2px;">30</span>
+                        <span style="font-size:9px;opacity:.75;">Jul</span>
+                    </button>
+                                                        <button type="button"
+                            onclick="mobSelectDate(this,'2026-07-31')"
+                            data-date="2026-07-31"
+                            style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;width:44px;padding:10px 0;border-radius:12px;border:1px solid #e5e7eb;background:transparent;color:#4b5563;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                            class="mob-date-btn">
+                        <span style="font-size:9px;opacity:.75;text-transform:uppercase;">T6</span>
+                        <span style="font-size:14px;font-weight:800;margin-top:2px;">31</span>
+                        <span style="font-size:9px;opacity:.75;">Jul</span>
+                    </button>
+                                                        <button type="button"
+                            onclick="mobSelectDate(this,'2026-08-01')"
+                            data-date="2026-08-01"
+                            style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;width:44px;padding:10px 0;border-radius:12px;border:1px solid #e5e7eb;background:transparent;color:#4b5563;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                            class="mob-date-btn">
+                        <span style="font-size:9px;opacity:.75;text-transform:uppercase;">T7</span>
+                        <span style="font-size:14px;font-weight:800;margin-top:2px;">01</span>
+                        <span style="font-size:9px;opacity:.75;">Aug</span>
+                    </button>
+                                                        <button type="button"
+                            onclick="mobSelectDate(this,'2026-08-02')"
+                            data-date="2026-08-02"
+                            style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;width:44px;padding:10px 0;border-radius:12px;border:1px solid #e5e7eb;background:transparent;color:#4b5563;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                            class="mob-date-btn">
+                        <span style="font-size:9px;opacity:.75;text-transform:uppercase;">CN</span>
+                        <span style="font-size:14px;font-weight:800;margin-top:2px;">02</span>
+                        <span style="font-size:9px;opacity:.75;">Aug</span>
+                    </button>
+                                                        <button type="button"
+                            onclick="mobSelectDate(this,'2026-08-03')"
+                            data-date="2026-08-03"
+                            style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;width:44px;padding:10px 0;border-radius:12px;border:1px solid #e5e7eb;background:transparent;color:#4b5563;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                            class="mob-date-btn">
+                        <span style="font-size:9px;opacity:.75;text-transform:uppercase;">T2</span>
+                        <span style="font-size:14px;font-weight:800;margin-top:2px;">03</span>
+                        <span style="font-size:9px;opacity:.75;">Aug</span>
+                    </button>
+                                                        <button type="button"
+                            onclick="mobSelectDate(this,'2026-08-04')"
+                            data-date="2026-08-04"
+                            style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;width:44px;padding:10px 0;border-radius:12px;border:1px solid #e5e7eb;background:transparent;color:#4b5563;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                            class="mob-date-btn">
+                        <span style="font-size:9px;opacity:.75;text-transform:uppercase;">T3</span>
+                        <span style="font-size:14px;font-weight:800;margin-top:2px;">04</span>
+                        <span style="font-size:9px;opacity:.75;">Aug</span>
+                    </button>
+                                                        <button type="button"
+                            onclick="mobSelectDate(this,'2026-08-05')"
+                            data-date="2026-08-05"
+                            style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;width:44px;padding:10px 0;border-radius:12px;border:1px solid #e5e7eb;background:transparent;color:#4b5563;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                            class="mob-date-btn">
+                        <span style="font-size:9px;opacity:.75;text-transform:uppercase;">T4</span>
+                        <span style="font-size:14px;font-weight:800;margin-top:2px;">05</span>
+                        <span style="font-size:9px;opacity:.75;">Aug</span>
+                    </button>
+                            </div>
+        </div>
+
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+                            <button type="button"
+                        onclick="mobSelectTime(this,'09:00')"
+                        style="padding:8px;border-radius:12px;border:1px solid #e5e7eb;background:transparent;color:#4b5563;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                        class="mob-time-btn">
+                    09:00
+                </button>
+                            <button type="button"
+                        onclick="mobSelectTime(this,'10:30')"
+                        style="padding:8px;border-radius:12px;border:1px solid #e5e7eb;background:transparent;color:#4b5563;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                        class="mob-time-btn">
+                    10:30
+                </button>
+                            <button type="button"
+                        onclick="mobSelectTime(this,'14:00')"
+                        style="padding:8px;border-radius:12px;border:1px solid #e5e7eb;background:transparent;color:#4b5563;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                        class="mob-time-btn">
+                    14:00
+                </button>
+                            <button type="button"
+                        onclick="mobSelectTime(this,'15:30')"
+                        style="padding:8px;border-radius:12px;border:1px solid #e5e7eb;background:transparent;color:#4b5563;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                        class="mob-time-btn">
+                    15:30
+                </button>
+                            <button type="button"
+                        onclick="mobSelectTime(this,'17:00')"
+                        style="padding:8px;border-radius:12px;border:1px solid #e5e7eb;background:transparent;color:#4b5563;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                        class="mob-time-btn">
+                    17:00
+                </button>
+                    </div>
+
+        
+        <form id="mob-booking-form" style="display:flex;flex-direction:column;gap:10px;">
+            <input type="hidden" name="_token" value="" autocomplete="off">            <input type="hidden" name="property_id" value="19">
+            <input type="hidden" name="booking_date" id="mob_booking_date" value="2026-07-30">
+            <input type="hidden" name="booking_time" id="mob_booking_time" value="">
+            <input type="text" name="contact_name" placeholder="Họ tên của bạn"
+                   style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:12px;font-size:13px;outline:none;box-sizing:border-box;">
+            <input type="tel" name="contact_phone" placeholder="Số điện thoại"
+                   style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:12px;font-size:13px;outline:none;box-sizing:border-box;">
+            <button type="submit"
+                    style="width:100%;background:#0d9488;color:#fff;font-weight:700;padding:12px;border-radius:12px;border:none;font-size:14px;cursor:pointer;transition:opacity .2s;">
+                Gửi yêu cầu đặt lịch
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+// ── Gallery (Desktop) ────────────────────────────────────
+const galleryImages = ["\/AnhDuAn\/cover_6a48f7f62ad1d.jpg","\/AnhDuAn\/media_6a48f7f62c0df.jfif"];
+let currentImg     = 0;
+let currentMainIdx = 0;
+
+function switchMain(el, idx) {
+    currentMainIdx = idx;
+    const main = document.getElementById('main-gallery-img');
+    if (main) main.src = galleryImages[idx];
+    document.querySelectorAll('.thumbnail-wrap').forEach(t => {
+        t.classList.remove('ring-[2.5px]', 'ring-teal-400', 'ring-offset-1');
+    });
+    document.querySelectorAll(`.thumbnail-wrap[data-idx="${idx}"]`).forEach(t => {
+        t.classList.add('ring-[2.5px]', 'ring-teal-400', 'ring-offset-1');
+    });
+}
+
+function openGallery(idx) {
+    currentImg = idx;
+    document.getElementById('gallery-modal').classList.replace('hidden','flex');
+    updateModal();
+}
+function closeGallery() {
+    document.getElementById('gallery-modal').classList.replace('flex','hidden');
+}
+function prevImg() { currentImg = (currentImg - 1 + galleryImages.length) % galleryImages.length; updateModal(); }
+function nextImg() { currentImg = (currentImg + 1) % galleryImages.length; updateModal(); }
+function updateModal() {
+    document.getElementById('modal-img').src = galleryImages[currentImg];
+    document.getElementById('modal-counter').textContent = (currentImg + 1) + ' / ' + galleryImages.length;
+}
+document.addEventListener('keydown', e => {
+    if (document.getElementById('gallery-modal').classList.contains('flex')) {
+        if (e.key==='ArrowLeft') prevImg();
+        if (e.key==='ArrowRight') nextImg();
+        if (e.key==='Escape') closeGallery();
+    }
+});
+
+// ── Mobile Carousel ──────────────────────────────────────
+(function() {
+    const track  = document.getElementById('mobTrack');
+    if (!track) return;
+    const dots   = document.querySelectorAll('.mob-dot');
+    const counter = document.getElementById('mobCounter');
+    const total  = galleryImages.length;
+
+    function updateDots(idx) {
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        if (counter) counter.textContent = (idx + 1) + '/' + total;
+    }
+
+    track.addEventListener('scroll', () => {
+        const idx = Math.round(track.scrollLeft / track.clientWidth);
+        updateDots(idx);
+    }, { passive: true });
+})();
+
+// ── Mobile description toggle ────────────────────────────
+function mobToggleDesc() {
+    const desc = document.getElementById('mobDescText');
+    const icon = document.getElementById('mobSeeMoreIcon');
+    const btn  = document.getElementById('mobSeeMoreBtn');
+    const expanded = desc.classList.toggle('mob-clamped');
+    // classList.toggle returns the NEW state; true = class was ADDED (now clamped)
+    if (expanded) {
+        icon.textContent = '⌄';
+        btn.childNodes[0].textContent = 'Xem thêm ';
+    } else {
+        icon.textContent = '⌃';
+        btn.childNodes[0].textContent = 'Thu gọn ';
+    }
+}
+
+// ── Desktop Date & Time picker ───────────────────────────
+function selectDate(btn, date) {
+    document.querySelectorAll('.date-btn').forEach(b => {
+        b.classList.remove('bg-teal-600','border-teal-600','text-white');
+        b.classList.add('border-gray-200','text-gray-600');
+    });
+    btn.classList.add('bg-teal-600','border-teal-600','text-white');
+    btn.classList.remove('border-gray-200','text-gray-600');
+    document.getElementById('booking_date').value = date;
+}
+function selectTime(btn, time) {
+    document.querySelectorAll('.time-btn').forEach(b => {
+        b.classList.remove('bg-teal-600','border-teal-600','text-white');
+    });
+    btn.classList.add('bg-teal-600','border-teal-600','text-white');
+    document.getElementById('booking_time').value = time;
+}
+
+// ── Mobile Date & Time picker ────────────────────────────
+function mobSelectDate(btn, date) {
+    document.querySelectorAll('.mob-date-btn').forEach(b => {
+        b.style.background = 'transparent';
+        b.style.borderColor = '#e5e7eb';
+        b.style.color = '#4b5563';
+    });
+    btn.style.background = '#0d9488';
+    btn.style.borderColor = '#0d9488';
+    btn.style.color = '#fff';
+    document.getElementById('mob_booking_date').value = date;
+}
+function mobSelectTime(btn, time) {
+    document.querySelectorAll('.mob-time-btn').forEach(b => {
+        b.style.background = 'transparent';
+        b.style.borderColor = '#e5e7eb';
+        b.style.color = '#4b5563';
+    });
+    btn.style.background = '#0d9488';
+    btn.style.borderColor = '#0d9488';
+    btn.style.color = '#fff';
+    document.getElementById('mob_booking_time').value = time;
+}
+
+// ── Wishlist ─────────────────────────────────────────────
+let _wishlisted = false;
+
+function toggleWishlist(btn) {
+    const icon = btn.querySelector('i');
+    const saved = icon.classList.contains('fas');
+    if (saved) {
+        btn.innerHTML = '<i class="far fa-heart"></i> Lưu tin';
+        btn.classList.remove('text-red-500','border-red-300');
+    } else {
+        btn.innerHTML = '<i class="fas fa-heart text-red-500"></i> <span class="text-red-500">Đã lưu</span>';
+        btn.classList.add('border-red-300');
+    }
+    _doWishlistFetch();
+}
+
+function mobToggleWishlist() {
+    _wishlisted = !_wishlisted;
+    const icon = document.getElementById('mobSaveIcon');
+    const btn  = document.getElementById('mobSaveBtn');
+    if (_wishlisted) {
+        icon.textContent = '❤️';
+        btn.classList.add('saved');
+    } else {
+        icon.textContent = '♡';
+        btn.classList.remove('saved');
+    }
+    _doWishlistFetch();
+}
+
+function _doWishlistFetch() {
+    fetch('http://localhost:8000/wishlist/toggle', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': ''},
+        body: JSON.stringify({ property_id: 19 })
+    }).then(r => r.json()).then(d => {
+        if (!d.success && d.redirect) window.location.href = d.redirect;
+    });
+}
+
+// ── Share ─────────────────────────────────────────────────
+function shareProperty() { mobShare(); }
+function mobShare() {
+    if (navigator.share) {
+        navigator.share({ title: 'Phòng trọ sinh viên', url: window.location.href });
+    } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            // Simple toast
+            const toast = document.createElement('div');
+            toast.textContent = '✓ Đã sao chép link!';
+            toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0F3460;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;transition:opacity .3s;';
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+        });
+    }
+}
+
+// ── Expand description (Desktop) ─────────────────────────
+function expandDesc() {
+    document.getElementById('desc-full').classList.remove('hidden');
+    document.getElementById('desc-btn').remove();
+}
+
+// ── Desktop Booking form ──────────────────────────────────
+document.getElementById('booking-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const name  = formData.get('contact_name').trim();
+    const phone = formData.get('contact_phone').trim();
+    const time  = formData.get('booking_time');
+    if (!name || !phone) {
+        Swal.fire({ title: 'Lỗi', text: 'Vui lòng nhập họ tên và số điện thoại.', icon: 'error', confirmButtonText: 'Đóng',
+            customClass: { confirmButton: 'bg-primary text-white px-6 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity' }, buttonsStyling: false });
+        return;
+    }
+    if (!time) {
+        Swal.fire({ title: 'Lỗi', text: 'Vui lòng chọn khung giờ xem nhà.', icon: 'error', confirmButtonText: 'Đóng',
+            customClass: { confirmButton: 'bg-primary text-white px-6 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity' }, buttonsStyling: false });
+        return;
+    }
+    const btn = this.querySelector('button[type=submit]');
+    const oldText = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Đang gửi...';
+    fetch('http://localhost:8000/booking', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': '', 'Accept': 'application/json' },
+        body: formData
+    }).then(r => r.json()).then(data => {
+        btn.disabled = false; btn.textContent = oldText;
+        if (data.success) {
+            Swal.fire({ title: 'Đã gửi yêu cầu đặt lịch!', text: data.message, icon: 'success', confirmButtonText: 'Đóng',
+                customClass: { confirmButton: 'bg-primary text-white px-6 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity' }, buttonsStyling: false });
+            this.reset();
+        } else {
+            Swal.fire({ title: 'Lỗi', text: data.message || 'Có lỗi xảy ra.', icon: 'error', confirmButtonText: 'Đóng',
+                customClass: { confirmButton: 'bg-primary text-white px-6 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity' }, buttonsStyling: false });
+        }
+    }).catch(() => {
+        btn.disabled = false; btn.textContent = oldText;
+        Swal.fire({ title: 'Lỗi', text: 'Không thể kết nối đến máy chủ.', icon: 'error', confirmButtonText: 'Đóng',
+            customClass: { confirmButton: 'bg-primary text-white px-6 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity' }, buttonsStyling: false });
+    });
+});
+
+// ── Mobile Booking form ───────────────────────────────────
+document.getElementById('mob-booking-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const name  = formData.get('contact_name').trim();
+    const phone = formData.get('contact_phone').trim();
+    const time  = formData.get('booking_time');
+    if (!name || !phone || !time) {
+        alert('Vui lòng nhập đầy đủ họ tên, số điện thoại và chọn khung giờ.');
+        return;
+    }
+    const btn = this.querySelector('button[type=submit]');
+    const oldText = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Đang gửi...';
+    fetch('http://localhost:8000/booking', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': '', 'Accept': 'application/json' },
+        body: formData
+    }).then(r => r.json()).then(data => {
+        btn.disabled = false; btn.textContent = oldText;
+        if (data.success) {
+            document.getElementById('mob-booking-modal').classList.add('hidden');
+            const toast = document.createElement('div');
+            toast.textContent = '✓ Đã gửi yêu cầu đặt lịch!';
+            toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0d9488;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+            this.reset();
+        } else {
+            alert(data.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+        }
+    }).catch(() => {
+        btn.disabled = false; btn.textContent = oldText;
+        alert('Không thể kết nối đến máy chủ.');
+    });
+});
+</script>
+    </main>
+    
+    <footer class="bg-footer-bg border-t border-slate-100/80 text-muted-foreground mt-16">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-12 md:py-16">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+            <!-- Col 1: Logo & Intro -->
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white shadow-xs">
+                        <i class="fas fa-water text-sm"></i>
+                    </div>
+                    <span class="text-lg font-black text-gray-900 tracking-wider">
+                        LAND<span class="text-teal-600">TEK</span>
+                    </span>
+                </div>
+                <p class="text-sm text-muted-foreground leading-relaxed max-w-xs">
+                    Nền tảng thuê & cho thuê bất động sản chuyên biệt tại Nha Trang. Dữ liệu chuẩn xác, tin đăng xác thực.
+                </p>
+            </div>
+
+            <!-- Col 2: Khám phá -->
+            <div>
+                <h4 class="font-bold text-gray-900 mb-4 text-base tracking-wide">Khám phá</h4>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="http://localhost:8000/thue?type=apartment" class="text-sm text-muted-foreground hover:text-teal-600 font-medium transition-colors">
+                            Thuê căn hộ
+                        </a>
+                    </li>
+                    <li>
+                        <a href="http://localhost:8000/du-an" class="text-sm text-muted-foreground hover:text-teal-600 font-medium transition-colors">
+                            Dự án nổi bật
+                        </a>
+                    </li>
+                    <li>
+                        <a href="http://localhost:8000/moi-gioi" class="text-sm text-muted-foreground hover:text-teal-600 font-medium transition-colors">
+                            Môi giới uy tín
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Col 3: Dành cho chủ nhà -->
+            <div>
+                <h4 class="font-bold text-gray-900 mb-4 text-base tracking-wide">Dành cho chủ nhà</h4>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="http://localhost:8000/dang-tin" class="text-sm text-muted-foreground hover:text-teal-600 font-medium transition-colors">
+                            Đăng tin cho thuê
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-sm text-muted-foreground hover:text-teal-600 font-medium transition-colors">
+                            Trở thành Verified Agent
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Col 4: Liên hệ -->
+            <div>
+                <h4 class="font-bold text-gray-900 mb-4 text-base tracking-wide">Liên hệ</h4>
+                <ul class="space-y-3 text-sm text-muted-foreground font-medium">
+                    <li class="flex items-center gap-2">
+                        <span>Hotline: 0258 888 6868</span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span>Email: hello@landtek.com.vn</span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span>TP. Nha Trang, Khánh Hòa</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mt-12 pt-8 border-t border-slate-200/40 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p class="text-xs text-muted-foreground/80">&copy; 2026 LANDTEK. All rights reserved.</p>
+            <div class="flex gap-4 text-xs text-muted-foreground/80">
+                <a href="#" class="hover:text-teal-600 transition-colors">Điều khoản dịch vụ</a>
+                <a href="#" class="hover:text-teal-600 transition-colors">Chính sách bảo mật</a>
+            </div>
+        </div>
+    </div>
+</footer>
+    
+    
+    <link rel="preload" as="style" href="http://localhost:8000/build/assets/app-DUCsFygC.css" /><link rel="preload" as="style" href="http://localhost:8000/build/assets/app-_9ujQRQg.css" /><link rel="modulepreload" as="script" href="http://localhost:8000/build/assets/app-Dcn0c7Eq.js" /><link rel="stylesheet" href="http://localhost:8000/build/assets/app-DUCsFygC.css" /><link rel="stylesheet" href="http://localhost:8000/build/assets/app-_9ujQRQg.css" /><script type="module" src="http://localhost:8000/build/assets/app-Dcn0c7Eq.js"></script>    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // ===== GLOBAL SWEETALERT2 MIXIN =====
+        window.SwalSuccess = Swal.mixin({
+            icon: 'success',
+            confirmButtonText: 'Đóng',
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: 'swal-btn-primary',
+                cancelButton: 'swal-btn-secondary',
+            }
+        });
+        window.SwalError = Swal.mixin({
+            icon: 'error',
+            confirmButtonText: 'Đóng',
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: 'swal-btn-primary',
+            }
+        });
+        window.SwalWarning = Swal.mixin({
+            icon: 'warning',
+            confirmButtonText: 'Đóng',
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: 'swal-btn-primary',
+                cancelButton: 'swal-btn-secondary',
+            }
+        });
+        window.SwalConfirm = function(message, callback) {
+            Swal.fire({
+                title: 'Xác nhận',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy',
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: 'swal-btn-danger',
+                    cancelButton: 'swal-btn-secondary',
+                }
+            }).then(function(result) {
+                if (result.isConfirmed) callback();
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+                                                        });
+    </script>
+    <style>
+        .swal-btn-primary { background: oklch(58% 0.13 218) !important; color: white !important; padding: 0.625rem 1.5rem !important; border-radius: 0.75rem !important; font-weight: 700 !important; font-size: 0.875rem !important; border: none !important; cursor: pointer !important; transition: opacity 0.2s !important; }
+        .swal-btn-primary:hover { opacity: 0.88 !important; }
+        .swal-btn-secondary { background: #f1f5f9 !important; color: #475569 !important; padding: 0.625rem 1.5rem !important; border-radius: 0.75rem !important; font-weight: 700 !important; font-size: 0.875rem !important; border: none !important; cursor: pointer !important; margin-right: 0.5rem !important; transition: background 0.2s !important; }
+        .swal-btn-secondary:hover { background: #e2e8f0 !important; }
+        .swal-btn-danger { background: #dc2626 !important; color: white !important; padding: 0.625rem 1.5rem !important; border-radius: 0.75rem !important; font-weight: 700 !important; font-size: 0.875rem !important; border: none !important; cursor: pointer !important; transition: opacity 0.2s !important; }
+        .swal-btn-danger:hover { opacity: 0.88 !important; }
+        .swal2-popup { border-radius: 1.25rem !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
+    </style>
+    </body>
+</html>

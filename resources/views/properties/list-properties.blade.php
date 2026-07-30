@@ -483,16 +483,29 @@
         flex-shrink: 0;
         display: inline-block;
     }
-    .status-active  { background:#ecfdf5; color:#059669; border-color:rgba(16,185,129,0.25); }
-    .status-active .status-dot  { background:#10b981; }
-    .status-pending { background:#fffbeb; color:#d97706; border-color:rgba(245,158,11,0.25); }
-    .status-pending .status-dot { background:#f59e0b; }
-    .status-sold    { background:#eff6ff; color:#2563eb; border-color:rgba(59,130,246,0.25); }
-    .status-sold .status-dot    { background:#3b82f6; }
-    .status-hidden  { background:#f8fafc; color:#64748b; border-color:rgba(100,116,139,0.25); }
-    .status-hidden .status-dot  { background:#94a3b8; }
-    .status-deleted { background:#fef2f2; color:#dc2626; border-color:rgba(220,38,38,0.25); }
-    .status-deleted .status-dot { background:#ef4444; }
+    .status-sansangchothue  { background:#ecfdf5; color:#059669; border-color:rgba(16,185,129,0.25); }
+    .status-sansangchothue .status-dot  { background:#10b981; }
+
+    .status-choduyet { background:#fffbeb; color:#d97706; border-color:rgba(245,158,11,0.25); }
+    .status-choduyet .status-dot { background:#f59e0b; }
+
+    .status-dachothue    { background:#eff6ff; color:#2563eb; border-color:rgba(59,130,246,0.25); }
+    .status-dachothue .status-dot    { background:#3b82f6; }
+
+    .status-nhap  { background:#f8fafc; color:#64748b; border-color:rgba(100,116,139,0.25); }
+    .status-nhap .status-dot  { background:#94a3b8; }
+
+    .status-taman { background:#f3f4f6; color:#4b5563; border-color:rgba(107,114,128,0.25); }
+    .status-taman .status-dot { background:#6b7280; }
+
+    .status-hethantin { background:#fff1f2; color:#e11d48; border-color:rgba(225,29,72,0.25); }
+    .status-hethantin .status-dot { background:#f43f5e; }
+
+    .status-ngungkhaithac { background:#faf5ff; color:#9333ea; border-color:rgba(147,51,234,0.25); }
+    .status-ngungkhaithac .status-dot { background:#a855f7; }
+
+    .status-bigovipham { background:#fef2f2; color:#dc2626; border-color:rgba(220,38,38,0.25); }
+    .status-bigovipham .status-dot { background:#ef4444; }
 
     /* Action dropdown */
     #floatingDropdown {
@@ -743,10 +756,14 @@
                 </select>
                 <select id="filterStatus" class="filter-select">
                     <option value="">Tất cả trạng thái</option>
-                    <option value="Đang hiển thị">Đang hiển thị</option>
+                    <option value="Sẵn sàng cho thuê">Sẵn sàng cho thuê</option>
                     <option value="Chờ duyệt">Chờ duyệt</option>
-                    <option value="Đã bán/Cho thuê">Đã bán/Cho thuê</option>
-                    <option value="Đã ẩn/Khóa">Đã ẩn/Khóa</option>
+                    <option value="Nháp">Nháp</option>
+                    <option value="Đã cho thuê">Đã cho thuê</option>
+                    <option value="Tạm ẩn">Tạm ẩn</option>
+                    <option value="Hết hạn tin">Hết hạn tin</option>
+                    <option value="Ngừng khai thác">Ngừng khai thác</option>
+                    <option value="Bị gỡ (vi phạm)">Bị gỡ (vi phạm)</option>
                 </select>
             </div>
 
@@ -859,8 +876,8 @@
                     // Compute stats from the returned data
                     var data = json.data || [];
                     var total   = data.length;
-                    var active  = data.filter(function(r){ return (r.status === 'active' || r.status === 'published') && r.active !== 0 && r.active !== false; }).length;
-                    var pending = data.filter(function(r){ return r.status === 'pending' && r.active !== 0 && r.active !== false; }).length;
+                    var active  = data.filter(function(r){ return r.status === 'sansangchothue' && r.active !== 0 && r.active !== false; }).length;
+                    var pending = data.filter(function(r){ return r.status === 'choduyet' && r.active !== 0 && r.active !== false; }).length;
 
                     animateCount('statTotal',   total);
                     animateCount('statActive',  active);
@@ -972,16 +989,19 @@
                     data: 'status',
                     render: function(data, type, row) {
                         if (row.active === false || row.active === 0) {
-                            return `<span class="status-badge status-deleted"><span class="status-dot"></span>Đã xóa</span>`;
-                        } else if (data == 'active' || data == 'published') {
-                            return `<span class="status-badge status-active"><span class="status-dot"></span>Đang hiển thị</span>`;
-                        } else if (data == 'pending') {
-                            return `<span class="status-badge status-pending"><span class="status-dot"></span>Chờ duyệt</span>`;
-                        } else if (data == 'sold' || data == 'rented') {
-                            return `<span class="status-badge status-sold"><span class="status-dot"></span>Đã giao dịch</span>`;
-                        } else {
-                            return `<span class="status-badge status-hidden"><span class="status-dot"></span>Đã ẩn</span>`;
+                            return `<span class="status-badge status-bigovipham"><span class="status-dot"></span>Đã xóa</span>`;
                         }
+                        const badges = {
+                            'nhap': `<span class="status-badge status-nhap"><span class="status-dot"></span>Nháp</span>`,
+                            'choduyet': `<span class="status-badge status-choduyet"><span class="status-dot"></span>Chờ duyệt</span>`,
+                            'sansangchothue': `<span class="status-badge status-sansangchothue"><span class="status-dot"></span>Sẵn sàng cho thuê</span>`,
+                            'dachothue': `<span class="status-badge status-dachothue"><span class="status-dot"></span>Đã cho thuê</span>`,
+                            'taman': `<span class="status-badge status-taman"><span class="status-dot"></span>Tạm ẩn</span>`,
+                            'hethantin': `<span class="status-badge status-hethantin"><span class="status-dot"></span>Hết hạn tin</span>`,
+                            'ngungkhaithac': `<span class="status-badge status-ngungkhaithac"><span class="status-dot"></span>Ngừng khai thác</span>`,
+                            'bigovipham': `<span class="status-badge status-bigovipham"><span class="status-dot"></span>Bị gỡ (vi phạm)</span>`,
+                        };
+                        return badges[data] || `<span class="status-badge status-nhap"><span class="status-dot"></span>${data}</span>`;
                     }
                 },
                 /* 6 - Thao tác */
@@ -989,24 +1009,36 @@
                     data: null,
                     render: function(data, type, row) {
                         var actionButtons = '';
-                        if (row.status == 'pending' || row.status == 'draft') {
+                        if (row.status == 'choduyet' || row.status == 'nhap') {
                             actionButtons += `
                             <form action="${row.route_status}" method="POST" style="margin:0">
                                 <input type="hidden" name="_token" value="${csrfToken}">
-                                <input type="hidden" name="status" value="active">
+                                <input type="hidden" name="status" value="sansangchothue">
                                 <button type="submit" class="dm-item green"><i class="fas fa-check-circle"></i>Duyệt bài</button>
                             </form>
                             <form action="${row.route_status}" method="POST" style="margin:0">
                                 <input type="hidden" name="_token" value="${csrfToken}">
-                                <input type="hidden" name="status" value="hidden">
-                                <button type="submit" class="dm-item amber"><i class="fas fa-times-circle"></i>Từ chối</button>
+                                <input type="hidden" name="status" value="taman">
+                                <button type="submit" class="dm-item amber"><i class="fas fa-eye-slash"></i>Tạm ẩn</button>
                             </form>`;
-                        } else if (row.status == 'active' || row.status == 'published') {
+                        } else if (row.status == 'sansangchothue') {
                             actionButtons += `
                             <form action="${row.route_status}" method="POST" style="margin:0">
                                 <input type="hidden" name="_token" value="${csrfToken}">
-                                <input type="hidden" name="status" value="hidden">
-                                <button type="submit" class="dm-item amber"><i class="fas fa-eye-slash"></i>Ẩn bài</button>
+                                <input type="hidden" name="status" value="dachothue">
+                                <button type="submit" class="dm-item blue"><i class="fas fa-key"></i>Đã cho thuê</button>
+                            </form>
+                            <form action="${row.route_status}" method="POST" style="margin:0">
+                                <input type="hidden" name="_token" value="${csrfToken}">
+                                <input type="hidden" name="status" value="taman">
+                                <button type="submit" class="dm-item amber"><i class="fas fa-eye-slash"></i>Tạm ẩn</button>
+                            </form>`;
+                        } else if (row.status == 'taman' || row.status == 'hethantin') {
+                            actionButtons += `
+                            <form action="${row.route_status}" method="POST" style="margin:0">
+                                <input type="hidden" name="_token" value="${csrfToken}">
+                                <input type="hidden" name="status" value="sansangchothue">
+                                <button type="submit" class="dm-item green"><i class="fas fa-paper-plane"></i>Sẵn sàng cho thuê</button>
                             </form>`;
                         }
 

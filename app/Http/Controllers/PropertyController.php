@@ -16,6 +16,21 @@ class PropertyController extends Controller
      */
     public function store(Request $request)
     {
+        $sessionUser = session('user');
+        $userId = $sessionUser ? ($sessionUser['id'] ?? $sessionUser->id) : (Auth::id() ?? 1);
+
+        $draftId = $request->input('draft_id');
+        $draftProperty = null;
+        if ($draftId) {
+            $draftProperty = Property::withoutGlobalScope('active')
+                ->where('id', $draftId)
+                ->where('user_id', $userId)
+                ->first();
+        }
+
+        $hasExistingCover = $draftProperty && !empty($draftProperty->cover_image_url);
+        $hasExistingMedia = $draftProperty && ($draftProperty->media()->count() > 0 || $request->has('existing_media'));
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -27,17 +42,18 @@ class PropertyController extends Controller
             'area' => 'required|numeric|min:0',
             'monthly_price' => 'required|numeric|min:0',
             'utilities' => 'nullable|array',
-            'images' => 'required|array|min:1',
+            'images' => ($hasExistingMedia ? 'nullable' : 'required') . '|array',
             'images.*' => 'file|mimes:jpeg,png,jpg,webp,mp4,mov,avi|max:51200', // Max 50MB
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240' // Max 10MB
+            'cover_image' => ($hasExistingCover ? 'nullable' : 'required') . '|image|mimes:jpeg,png,jpg,webp|max:10240' // Max 10MB
         ]);
 
-        // Create the property
-        $property = new Property();
-        $sessionUser = session('user');
-        $property->user_id = $sessionUser ? ($sessionUser['id'] ?? $sessionUser->id) : (Auth::id() ?? 1);
+        // Create or update the property
+        $property = $draftProperty ?: new Property();
+        $property->user_id = $userId;
         $property->title = $request->title;
-        $property->slug = Str::slug($request->title) . '-' . uniqid();
+        if (!$property->slug) {
+            $property->slug = Str::slug($request->title) . '-' . uniqid();
+        }
         $property->description = $request->description;
         $property->property_type = $request->property_type;
         $property->address = $request->district . ', Nha Trang'; // Simplification
@@ -49,14 +65,12 @@ class PropertyController extends Controller
         $property->monthly_price = $request->monthly_price;
         $property->price = $request->monthly_price; // Assuming monthly price is the main price for rent
         $property->transaction_type = 'rent';
-        $property->status = 'draft';
+        $property->status = 'choduyet';
         
-        // Utilities will be attached after property is saved
-
         $property->save();
 
         if ($request->has('utilities')) {
-            $property->utilities()->attach($request->utilities);
+            $property->utilities()->sync($request->utilities);
         }
 
         // Handle Cover Image
@@ -70,7 +84,9 @@ class PropertyController extends Controller
 
         // Handle Images & Videos
         if ($request->hasFile('images')) {
-            $displayOrder = 1;
+            $displayOrder = PropertyMedia::where('property_id', $property->id)->max('display_order') ?? 0;
+            $displayOrder++;
+
             foreach ($request->file('images') as $file) {
                 $filename = uniqid('media_') . '.' . $file->getClientOriginalExtension();
                 $file->move(public_path('AnhDuAn'), $filename);
@@ -90,10 +106,10 @@ class PropertyController extends Controller
         }
 
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'Tạo tin thành công!']);
+            return response()->json(['success' => true, 'message' => 'Gửi tin thành công!']);
         }
 
-        return redirect()->route('home')->with('success', 'Tạo tin thành công! Tin của bạn đang chờ duyệt.');
+        return redirect()->route('home')->with('success', 'Gửi tin thành công! Tin của bạn đang chờ duyệt.');
     }
 
     /**
@@ -182,7 +198,7 @@ class PropertyController extends Controller
         $property->area = $request->area;
         $property->monthly_price = $request->monthly_price;
         $property->price = $request->monthly_price;
-        $property->status = 'draft'; // Require re-approval on edit? Yes, usually.
+        $property->status = 'choduyet'; // Require re-approval on edit
 
         $property->save();
 
@@ -248,5 +264,107 @@ class PropertyController extends Controller
         }
 
         return redirect()->route('my-properties')->with('success', 'Cập nhật tin thành công!');
+    }
+
+    /**
+     * Auto-save draft property (status = 'nhap').
+     */
+    public function saveDraft(Request $request)
+    {
+        if (!session()->has('user')) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $sessionUser = session('user');
+        $userId = is_array($sessionUser) ? ($sessionUser['id'] ?? null) : ($sessionUser->id ?? null);
+        if (!$userId) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $draftId = $request->input('draft_id');
+        $property = null;
+
+        if ($draftId) {
+            $property = \App\Models\Property::withoutGlobalScope('active')
+                ->where('id', $draftId)
+                ->where('user_id', $userId)
+                ->first();
+        }
+
+        if (!$property) {
+            $property = \App\Models\Property::withoutGlobalScope('active')
+                ->where('user_id', $userId)
+                ->where('status', 'nhap')
+                ->latest()
+                ->first();
+        }
+
+        if (!$property) {
+            $property = new \App\Models\Property();
+            $property->user_id = $userId;
+        }
+
+        $title = $request->input('title');
+        if (empty($title)) {
+            $title = 'Bản nháp tin đăng';
+        }
+
+        $property->title = $title;
+        $property->slug = \Illuminate\Support\Str::slug($title) . '-' . time() . '-' . rand(100, 999);
+        $property->property_type = $request->input('property_type', 'apartment');
+        $property->district = $request->input('district', 'Lộc Thọ');
+        $property->address = $request->input('address') ?: ($property->district ? $property->district . ', Nha Trang' : 'Nha Trang');
+        $property->project = $request->input('project');
+        $property->bedrooms = $request->input('bedrooms', 1);
+        $property->bathrooms = $request->input('bathrooms', 1);
+        $property->area = $request->input('area');
+        $property->monthly_price = $request->input('monthly_price');
+        $property->price = $request->input('monthly_price', 0);
+        $property->transaction_type = 'rent';
+        $property->description = $request->input('description');
+        $property->status = 'nhap';
+
+        $property->save();
+
+        if ($request->has('utilities')) {
+            $utilities = $request->input('utilities');
+            if (is_string($utilities)) {
+                $utilities = json_decode($utilities, true);
+            }
+            if (is_array($utilities)) {
+                $property->utilities()->sync($utilities);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'draft_id' => $property->id,
+            'message' => 'Đã lưu bản nháp'
+        ]);
+    }
+
+    /**
+     * Delete draft property.
+     */
+    public function deleteDraft($id)
+    {
+        if (!session()->has('user')) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $sessionUser = session('user');
+        $userId = is_array($sessionUser) ? ($sessionUser['id'] ?? null) : ($sessionUser->id ?? null);
+
+        $property = \App\Models\Property::withoutGlobalScope('active')
+            ->where('id', $id)
+            ->where('user_id', $userId)
+            ->where('status', 'nhap')
+            ->first();
+
+        if ($property) {
+            $property->delete();
+        }
+
+        return response()->json(['success' => true, 'message' => 'Đã xóa bản nháp']);
     }
 }

@@ -31,6 +31,7 @@ class Property extends Model
         'transaction_type',
         'distance_to_beach',
         'status',
+        'is_searchable',
         'view_count',
         'contact_count',
         'active',
@@ -47,6 +48,7 @@ class Property extends Model
         'distance_to_beach' => 'integer',
         'view_count' => 'integer',
         'contact_count' => 'integer',
+        'is_searchable' => 'boolean',
         'active' => 'boolean',
     ];
 
@@ -59,6 +61,11 @@ class Property extends Model
     {
         static::addGlobalScope('active', function (\Illuminate\Database\Eloquent\Builder $builder) {
             $builder->where('active', 1);
+        });
+
+        // Automatically set is_searchable ONLY when status is 'sansangchothue'
+        static::saving(function ($property) {
+            $property->is_searchable = ($property->status === 'sansangchothue');
         });
     }
 
@@ -142,5 +149,24 @@ class Property extends Model
         ];
 
         return $typeLabels[$this->property_type] ?? ucfirst($this->property_type);
+    }
+
+    /**
+     * Get the label for the status in Vietnamese.
+     */
+    public function getStatusLabelAttribute()
+    {
+        $statusLabels = [
+            'nhap' => 'Nháp',
+            'choduyet' => 'Chờ duyệt',
+            'sansangchothue' => 'Sẵn sàng cho thuê',
+            'dachothue' => 'Đã cho thuê',
+            'taman' => 'Tạm ẩn',
+            'hethantin' => 'Hết hạn tin',
+            'ngungkhaithac' => 'Ngừng khai thác',
+            'bigovipham' => 'Bị gỡ (vi phạm)',
+        ];
+
+        return $statusLabels[$this->status] ?? $this->status;
     }
 }
