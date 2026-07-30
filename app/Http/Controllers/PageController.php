@@ -12,7 +12,7 @@ class PageController extends Controller
     public function home(): View
     {
         $dbProperties = \App\Models\Property::with(['user', 'utilities'])
-            ->where('status', 'active')
+            ->where('is_searchable', 1)
             ->orderBy('created_at', 'desc')
             ->take(8)
             ->get();
@@ -61,7 +61,7 @@ class PageController extends Controller
     public function rentList(\Illuminate\Http\Request $request): View
     {
         $query = \App\Models\Property::with(['user', 'utilities'])
-            ->where('status', 'active');
+            ->where('is_searchable', 1);
             
         // Filters
         if ($request->filled('q')) {
@@ -212,7 +212,7 @@ class PageController extends Controller
         
         // Similar properties: same type, excluding current, max 4
         $similar = \App\Models\Property::with(['utilities'])
-            ->where('status', 'active')
+            ->where('is_searchable', 1)
             ->where('property_type', $property->property_type)
             ->where('id', '!=', $property->id)
             ->orderBy('created_at', 'desc')
@@ -222,11 +222,15 @@ class PageController extends Controller
         $userBooking = null;
         if (session()->has('last_booking_' . $property->id)) {
             $userBooking = \App\Models\Booking::find(session('last_booking_' . $property->id));
-        } elseif (session()->has('user') && !empty(session('user')->phone)) {
-            $userBooking = \App\Models\Booking::where('property_id', $property->id)
-                ->where('renter_phone', session('user')->phone)
-                ->latest('id')
-                ->first();
+        } elseif (session()->has('user')) {
+            $sessionUser = session('user');
+            $userPhone = is_array($sessionUser) ? ($sessionUser['phone'] ?? null) : ($sessionUser->phone ?? null);
+            if (!empty($userPhone)) {
+                $userBooking = \App\Models\Booking::where('property_id', $property->id)
+                    ->where('renter_phone', $userPhone)
+                    ->latest('id')
+                    ->first();
+            }
         }
 
         return view('pages.rent-detail', compact('property', 'similar', 'userBooking'));
@@ -242,8 +246,17 @@ class PageController extends Controller
             return redirect()->route('login');
         }
         
+        $sessionUser = session('user');
+        $userId = is_array($sessionUser) ? ($sessionUser['id'] ?? null) : ($sessionUser->id ?? null);
+        
+        $draftProperty = \App\Models\Property::withoutGlobalScope('active')
+            ->where('user_id', $userId)
+            ->where('status', 'nhap')
+            ->latest()
+            ->first();
+
         $utilities = \App\Models\Utility::where('is_active', true)->orderBy('sort_order')->get();
-        return view('pages.post-property', compact('utilities'));
+        return view('pages.post-property', compact('utilities', 'draftProperty'));
     }
     
     public function myProperties(\Illuminate\Http\Request $request): View|\Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse

@@ -86,8 +86,9 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-        $user->delete();
+        $user->status = 'inactive';
+        $user->save();
         
-        return redirect()->route('admin.users.index')->with('success', 'Đã xóa người dùng thành công.');
+        return redirect()->route('admin.users.index')->with('success', 'Đã xóa (ẩn) người dùng thành công.');
     }
 }

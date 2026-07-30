@@ -89,7 +89,7 @@ class PropertiesController extends Controller
             'address' => 'required|string',
             'price' => 'required|numeric',
             'area' => 'required|numeric',
-            'status' => 'required|string|in:active,pending,sold,rented,hidden,draft',
+            'status' => 'required|string|in:nhap,choduyet,sansangchothue,dachothue,taman,hethantin,ngungkhaithac,bigovipham',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240'
         ]);
 
@@ -112,7 +112,7 @@ class PropertiesController extends Controller
         $property = \App\Models\Property::findOrFail($id);
         
         $request->validate([
-            'status' => 'required|string|in:active,pending,sold,rented,hidden,draft',
+            'status' => 'required|string|in:nhap,choduyet,sansangchothue,dachothue,taman,hethantin,ngungkhaithac,bigovipham',
         ]);
 
         $property->update(['status' => $request->status]);
@@ -124,23 +124,9 @@ class PropertiesController extends Controller
     {
         $property = \App\Models\Property::withoutGlobalScope('active')->findOrFail($id);
         
-        // Kiểm tra xem có dữ liệu liên quan không
-        $hasRelatedData = $property->bookings()->exists() || 
-                          $property->contacts()->exists() || 
-                          $property->transactions()->exists() || 
-                          $property->rentals()->exists();
+        // Luôn ẩn bài đăng (Soft delete logic của hệ thống)
+        $property->update(['active' => 0]);
 
-        if ($hasRelatedData) {
-            // Ẩn bài đăng (Soft delete logic của hệ thống)
-            $property->update(['active' => 0]);
-        } else {
-            // Xóa thẳng (Hard delete) vì chưa có dữ liệu quan trọng liên quan
-            $property->media()->delete();
-            $property->utilities()->detach();
-            $property->calendar()->delete();
-            $property->delete();
-        }
-
-        return response()->json(['success' => true, 'message' => 'Đã xóa bài đăng thành công!']);
+        return response()->json(['success' => true, 'message' => 'Đã xóa (ẩn) bài đăng thành công!']);
     }
 }

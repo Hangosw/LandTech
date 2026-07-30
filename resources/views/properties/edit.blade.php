@@ -86,15 +86,18 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Trạng thái bài đăng</label>
                         <select name="status" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer">
-                            <option value="active" {{ old('status', $property->status) == 'active' ? 'selected' : '' }}>Đang hiển thị</option>
-                            <option value="pending" {{ old('status', $property->status) == 'pending' ? 'selected' : '' }}>Chờ duyệt</option>
-                            <option value="sold" {{ old('status', $property->status) == 'sold' ? 'selected' : '' }}>Đã chốt (Bán/Thuê)</option>
-                            <option value="hidden" {{ old('status', $property->status) == 'hidden' ? 'selected' : '' }}>Đã ẩn</option>
-                            <option value="draft" {{ old('status', $property->status) == 'draft' ? 'selected' : '' }}>Bản nháp</option>
+                            <option value="nhap" {{ old('status', $property->status) == 'nhap' ? 'selected' : '' }}>1. Nháp</option>
+                            <option value="choduyet" {{ old('status', $property->status) == 'choduyet' ? 'selected' : '' }}>2. Chờ duyệt</option>
+                            <option value="sansangchothue" {{ old('status', $property->status) == 'sansangchothue' ? 'selected' : '' }}>3. Sẵn sàng cho thuê</option>
+                            <option value="dachothue" {{ old('status', $property->status) == 'dachothue' ? 'selected' : '' }}>4. Đã cho thuê</option>
+                            <option value="taman" {{ old('status', $property->status) == 'taman' ? 'selected' : '' }}>5. Tạm ẩn</option>
+                            <option value="hethantin" {{ old('status', $property->status) == 'hethantin' ? 'selected' : '' }}>6. Hết hạn tin</option>
+                            <option value="ngungkhaithac" {{ old('status', $property->status) == 'ngungkhaithac' ? 'selected' : '' }}>7. Ngừng khai thác</option>
+                            <option value="bigovipham" {{ old('status', $property->status) == 'bigovipham' ? 'selected' : '' }}>8. Bị gỡ (vi phạm)</option>
                         </select>
                     </div>
 
-                    @if(in_array($property->status, ['draft', 'pending']))
+                    @if(in_array($property->status, ['nhap', 'choduyet']))
                     <div class="md:col-span-2">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Thay đổi ảnh bìa dự án</label>
                         <div class="flex items-start gap-6">

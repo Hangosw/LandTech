@@ -24,7 +24,22 @@
                 <span class="hdr-post-label">Đăng tin</span>
             </a>
 
-            @if(!session()->has('user'))
+            @if(session()->has('user'))
+                @php
+                    $hdrUser = \App\Models\User::find(session('user')->id);
+                @endphp
+                {{-- ── User Avatar Button (Mở menu cá nhân/admin) ── --}}
+                <button onclick="openMobMenu()"
+                        class="hdr-avatar-btn flex items-center justify-center overflow-hidden shrink-0 transition-all duration-200 active:scale-95 cursor-pointer"
+                        title="{{ session('user')->name }}">
+                    @if($hdrUser && $hdrUser->avatar_url)
+                        <img src="{{ Str::startsWith($hdrUser->avatar_url, 'http') ? $hdrUser->avatar_url : asset($hdrUser->avatar_url) }}"
+                             alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                    @else
+                        <i class="fas fa-user" style="font-size:14px;"></i>
+                    @endif
+                </button>
+            @else
                 {{-- ── Đăng nhập: ghost button ── --}}
                 <a href="{{ route('login') }}" class="hdr-btn-login inline-flex items-center justify-center gap-1.5 shrink-0 font-semibold transition-all duration-200 active:scale-95">
                     <i class="fas fa-circle-user" style="font-size:15px;"></i>
@@ -32,13 +47,15 @@
                 </a>
             @endif
 
-            {{-- ── Hamburger: mobile only ── --}}
+            {{-- ── Hamburger: hiện khi chưa đăng nhập trên mobile ── --}}
+            @if(!session()->has('user'))
             <button id="mob-menu-btn"
                     class="hdr-btn-menu md:hidden flex items-center justify-center shrink-0 transition-all duration-200 active:scale-95"
                     onclick="openMobMenu()"
                     aria-label="Mở menu">
                 <i class="fas fa-bars" style="font-size:13px;"></i>
             </button>
+            @endif
         </div>
     </div>
 </header>

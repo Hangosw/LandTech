@@ -47,7 +47,8 @@ class BookingController extends Controller
             return redirect()->route('login');
         }
 
-        $userId = session('user')->id;
+        $sessionUser = session('user');
+        $userId = is_array($sessionUser) ? ($sessionUser['id'] ?? null) : ($sessionUser->id ?? null);
         
         $bookings = Booking::with('property')
             ->whereHas('property', function ($query) use ($userId) {

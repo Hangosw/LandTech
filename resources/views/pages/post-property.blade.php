@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+    $targetProp = $property ?? $draftProperty ?? null;
+@endphp
+
 @section('title', isset($property) ? 'Chỉnh sửa tin đăng — LANDTEK' : 'Đăng tin cho thuê — LANDTEK')
 
 @section('content')
@@ -20,6 +24,19 @@
         </div>
     </div>
 
+    <!-- Banner khi đang tiếp tục bản nháp -->
+    @if(isset($draftProperty) && !isset($property))
+    <div id="draft-banner" class="mb-6 bg-teal-50 border border-teal-200 text-teal-900 px-4 py-3 rounded-xl flex items-center justify-between gap-4">
+        <div class="flex items-center gap-2 text-sm">
+            <i class="fas fa-file-signature text-teal-600 text-base"></i>
+            <span><strong>📌 Đang tiếp tục bản nháp:</strong> Hệ thống đã tự động khôi phục thông tin dở dang từ lần nhập trước của bạn.</span>
+        </div>
+        <button type="button" @click="deleteDraft({{ $draftProperty->id }})" class="text-xs font-semibold text-red-600 hover:text-red-800 underline shrink-0 cursor-pointer">
+            <i class="fas fa-trash-alt mr-1"></i> Xóa nháp & làm mới
+        </button>
+    </div>
+    @endif
+
     <!-- Form Card -->
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 sm:p-10">
         <!-- Error & Success Messages -->
@@ -39,7 +56,7 @@
             <!-- Tiêu đề -->
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-2">Tiêu đề tin đăng <span class="text-red-500">*</span></label>
-                <input type="text" name="title" required placeholder="VD: Căn hộ 2PN Mường Thanh view biển" value="{{ $property->title ?? '' }}"
+                <input type="text" name="title" required placeholder="VD: Căn hộ 2PN Mường Thanh view biển" value="{{ $targetProp->title ?? '' }}"
                        class="w-full rounded-lg border border-gray-200 bg-gray-50/30 px-4 py-3 text-sm text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-colors">
             </div>
 
@@ -48,31 +65,31 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Loại BĐS <span class="text-red-500">*</span></label>
                     <select name="property_type" required class="w-full rounded-lg border border-gray-200 bg-gray-50/30 px-4 py-3 text-sm text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-colors appearance-none">
-                        <option value="apartment" {{ (isset($property) && $property->property_type == 'apartment') ? 'selected' : '' }}>Căn hộ</option>
-                        <option value="house" {{ (isset($property) && $property->property_type == 'house') ? 'selected' : '' }}>Nhà phố</option>
-                        <option value="villa" {{ (isset($property) && $property->property_type == 'villa') ? 'selected' : '' }}>Biệt thự</option>
-                        <option value="office" {{ (isset($property) && $property->property_type == 'office') ? 'selected' : '' }}>Văn phòng</option>
-                        <option value="commercial" {{ (isset($property) && $property->property_type == 'commercial') ? 'selected' : '' }}>Mặt bằng kinh doanh</option>
+                        <option value="apartment" {{ (isset($targetProp) && $targetProp->property_type == 'apartment') ? 'selected' : '' }}>Căn hộ</option>
+                        <option value="house" {{ (isset($targetProp) && $targetProp->property_type == 'house') ? 'selected' : '' }}>Nhà phố</option>
+                        <option value="villa" {{ (isset($targetProp) && $targetProp->property_type == 'villa') ? 'selected' : '' }}>Biệt thự</option>
+                        <option value="office" {{ (isset($targetProp) && $targetProp->property_type == 'office') ? 'selected' : '' }}>Văn phòng</option>
+                        <option value="commercial" {{ (isset($targetProp) && $targetProp->property_type == 'commercial') ? 'selected' : '' }}>Mặt bằng kinh doanh</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Khu vực <span class="text-red-500">*</span></label>
                     <select name="district" required class="w-full rounded-lg border border-gray-200 bg-gray-50/30 px-4 py-3 text-sm text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-colors appearance-none">
-                        <option value="Lộc Thọ" {{ (isset($property) && $property->district == 'Lộc Thọ') ? 'selected' : '' }}>Lộc Thọ</option>
-                        <option value="Phước Hải" {{ (isset($property) && $property->district == 'Phước Hải') ? 'selected' : '' }}>Phước Hải</option>
-                        <option value="Vĩnh Hòa" {{ (isset($property) && $property->district == 'Vĩnh Hòa') ? 'selected' : '' }}>Vĩnh Hòa</option>
-                        <option value="Vĩnh Nguyên" {{ (isset($property) && $property->district == 'Vĩnh Nguyên') ? 'selected' : '' }}>Vĩnh Nguyên</option>
-                        <option value="Tân Lập" {{ (isset($property) && $property->district == 'Tân Lập') ? 'selected' : '' }}>Tân Lập</option>
+                        <option value="Lộc Thọ" {{ (isset($targetProp) && $targetProp->district == 'Lộc Thọ') ? 'selected' : '' }}>Lộc Thọ</option>
+                        <option value="Phước Hải" {{ (isset($targetProp) && $targetProp->district == 'Phước Hải') ? 'selected' : '' }}>Phước Hải</option>
+                        <option value="Vĩnh Hòa" {{ (isset($targetProp) && $targetProp->district == 'Vĩnh Hòa') ? 'selected' : '' }}>Vĩnh Hòa</option>
+                        <option value="Vĩnh Nguyên" {{ (isset($targetProp) && $targetProp->district == 'Vĩnh Nguyên') ? 'selected' : '' }}>Vĩnh Nguyên</option>
+                        <option value="Tân Lập" {{ (isset($targetProp) && $targetProp->district == 'Tân Lập') ? 'selected' : '' }}>Tân Lập</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Dự án (nếu có)</label>
                     <select name="project" class="w-full rounded-lg border border-gray-200 bg-gray-50/30 px-4 py-3 text-sm text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-colors appearance-none">
                         <option value="">— Không thuộc dự án —</option>
-                        <option value="muong-thanh" {{ (isset($property) && $property->project == 'muong-thanh') ? 'selected' : '' }}>Mường Thanh</option>
-                        <option value="vinpearl" {{ (isset($property) && $property->project == 'vinpearl') ? 'selected' : '' }}>Vinpearl</option>
-                        <option value="sun-group" {{ (isset($property) && $property->project == 'sun-group') ? 'selected' : '' }}>Sun Group</option>
-                        <option value="gold-coast" {{ (isset($property) && $property->project == 'gold-coast') ? 'selected' : '' }}>Gold Coast</option>
+                        <option value="muong-thanh" {{ (isset($targetProp) && $targetProp->project == 'muong-thanh') ? 'selected' : '' }}>Mường Thanh</option>
+                        <option value="vinpearl" {{ (isset($targetProp) && $targetProp->project == 'vinpearl') ? 'selected' : '' }}>Vinpearl</option>
+                        <option value="sun-group" {{ (isset($targetProp) && $targetProp->project == 'sun-group') ? 'selected' : '' }}>Sun Group</option>
+                        <option value="gold-coast" {{ (isset($targetProp) && $targetProp->project == 'gold-coast') ? 'selected' : '' }}>Gold Coast</option>
                     </select>
                 </div>
             </div>
@@ -81,22 +98,22 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Phòng ngủ <span class="text-red-500">*</span></label>
-                    <input type="number" name="bedrooms" value="{{ $property->bedrooms ?? 1 }}" min="0" required
+                    <input type="number" name="bedrooms" value="{{ $targetProp->bedrooms ?? 1 }}" min="0" required
                            class="w-full rounded-lg border border-gray-200 bg-gray-50/30 px-4 py-3 text-sm text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-colors text-center">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Phòng tắm <span class="text-red-500">*</span></label>
-                    <input type="number" name="bathrooms" value="{{ $property->bathrooms ?? 1 }}" min="0" required
+                    <input type="number" name="bathrooms" value="{{ $targetProp->bathrooms ?? 1 }}" min="0" required
                            class="w-full rounded-lg border border-gray-200 bg-gray-50/30 px-4 py-3 text-sm text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-colors text-center">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Diện tích (m²) <span class="text-red-500">*</span></label>
-                    <input type="number" name="area" placeholder="60" required value="{{ $property->area ?? '' }}"
+                    <input type="number" name="area" placeholder="60" required value="{{ $targetProp->area ?? '' }}"
                            class="w-full rounded-lg border border-gray-200 bg-gray-50/30 px-4 py-3 text-sm text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-colors text-center">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Giá (VNĐ/tháng) <span class="text-red-500">*</span></label>
-                    <input type="number" name="monthly_price" placeholder="8000000" required value="{{ $property->monthly_price ?? '' }}"
+                    <input type="number" name="monthly_price" placeholder="8000000" required value="{{ $targetProp->monthly_price ?? '' }}"
                            class="w-full rounded-lg border border-gray-200 bg-gray-50/30 px-4 py-3 text-sm text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-colors text-center">
                 </div>
             </div>
@@ -106,7 +123,7 @@
                 <label class="block text-xs font-semibold text-gray-700 mb-2">Mô tả chi tiết <span class="text-red-500">*</span></label>
                 <div class="border border-gray-200 rounded-lg overflow-hidden focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500 transition-colors bg-white">
                     <textarea name="description" rows="4" placeholder="Mô tả không gian, nội thất, khoảng cách tới biển..." required
-                              class="w-full p-4 text-sm text-gray-700 outline-none border-none resize-none">{{ $property->description ?? '' }}</textarea>
+                              class="w-full p-4 text-sm text-gray-700 outline-none border-none resize-none">{{ $targetProp->description ?? '' }}</textarea>
                 </div>
             </div>
 
@@ -116,7 +133,7 @@
                 <div class="flex flex-wrap gap-2.5">
                     @if(isset($utilities) && $utilities->count() > 0)
                         @php
-                            $propertyUtils = isset($property) ? $property->utilities->pluck('id')->toArray() : [];
+                            $propertyUtils = isset($targetProp) ? $targetProp->utilities->pluck('id')->toArray() : [];
                         @endphp
                         @foreach($utilities as $utility)
                             <label class="cursor-pointer inline-block">
@@ -217,11 +234,94 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('propertyForm', () => ({
             dragover: false,
-            previewImages: {!! isset($property) && $property->media ? json_encode($property->media->map(function($m) { return ['id' => $m->id, 'url' => $m->file_url, 'type' => $m->media_type, 'is_existing' => true]; })) : '[]' !!}, // { url: blobUrl, file: FileObj, is_existing: true/false }
-            coverImagePreview: '{!! isset($property) && $property->cover_image_url ? $property->cover_image_url : '' !!}',
+            previewImages: {!! isset($targetProp) && $targetProp->media ? json_encode($targetProp->media->map(function($m) { return ['id' => $m->id, 'url' => $m->file_url, 'type' => $m->media_type, 'is_existing' => true]; })) : '[]' !!},
+            coverImagePreview: '{!! isset($targetProp) && $targetProp->cover_image_url ? $targetProp->cover_image_url : '' !!}',
             coverImageFile: null,
             removeCoverFlag: false,
             isSubmitting: false,
+            hasSubmitted: false,
+            draftId: {{ isset($targetProp) && $targetProp->status == 'nhap' ? $targetProp->id : 'null' }},
+            autoSaveTimer: null,
+
+            init() {
+                this.$nextTick(() => {
+                    let form = this.$refs.form;
+                    if (form) {
+                        form.addEventListener('input', () => this.scheduleAutoSave());
+                        form.addEventListener('change', () => this.scheduleAutoSave());
+                    }
+                });
+
+                window.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'hidden') {
+                        this.autoSaveDraft();
+                    }
+                });
+
+                window.addEventListener('beforeunload', () => {
+                    this.autoSaveDraft();
+                });
+            },
+
+            scheduleAutoSave() {
+                if (this.hasSubmitted) return;
+                if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+                this.autoSaveTimer = setTimeout(() => {
+                    this.autoSaveDraft();
+                }, 2000);
+            },
+
+            autoSaveDraft() {
+                if (this.hasSubmitted || !this.$refs.form) return;
+                let form = this.$refs.form;
+                let formData = new FormData(form);
+                if (this.draftId) {
+                    formData.append('draft_id', this.draftId);
+                }
+                formData.delete('images[]');
+                formData.delete('cover_image');
+
+                fetch('{{ route("property.draft.save") }}', {
+                    method: 'POST',
+                    body: formData,
+                    keepalive: true,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.draft_id) {
+                        this.draftId = data.draft_id;
+                    }
+                })
+                .catch(err => {});
+            },
+
+            deleteDraft(id) {
+                Swal.fire({
+                    title: 'Xác nhận xóa nháp?',
+                    text: 'Mọi thông tin dở dang sẽ bị xóa bỏ.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Xóa nháp',
+                    cancelButtonText: 'Hủy',
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#9ca3af'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('/dang-tin/draft/' + id, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                });
+            },
 
             handleDrop(event) {
                 this.dragover = false;
@@ -245,6 +345,7 @@
                         }
                         this.coverImageFile = file;
                         this.coverImagePreview = URL.createObjectURL(file);
+                        this.scheduleAutoSave();
                     }
                 }
             },
@@ -257,6 +358,7 @@
                 this.coverImagePreview = null;
                 this.removeCoverFlag = true;
                 this.$refs.coverInput.value = '';
+                this.scheduleAutoSave();
             },
 
             addFiles(files) {
@@ -266,7 +368,6 @@
                     let isVideo = file.type.match('video.*');
 
                     if (isImage || isVideo) {
-                        // Create object URL for preview
                         let url = URL.createObjectURL(file);
                         this.previewImages.push({
                             url: url,
@@ -276,16 +377,16 @@
                         });
                     }
                 }
-                // We clear the input so the user can select the same file again if they remove and re-add
                 this.$refs.fileInput.value = '';
+                this.scheduleAutoSave();
             },
 
             removeImage(index) {
                 if (!this.previewImages[index].is_existing) {
-                    // revoke the object url to free memory
                     URL.revokeObjectURL(this.previewImages[index].url);
                 }
                 this.previewImages.splice(index, 1);
+                this.scheduleAutoSave();
             },
 
             submitForm() {
@@ -300,15 +401,15 @@
                 }
                 
                 this.isSubmitting = true;
+                this.hasSubmitted = true;
 
-                // Build FormData manually because standard file input gets cleared/can't be modified programmatically easily
                 let form = this.$refs.form;
                 let formData = new FormData(form);
-                
-                // Remove the default empty images[] if any
+                if (this.draftId) {
+                    formData.append('draft_id', this.draftId);
+                }
+
                 formData.delete('images[]');
-                
-                // Append the files we tracked in Alpine
                 formData.delete('cover_image');
                 if (this.coverImageFile) {
                     formData.append('cover_image', this.coverImageFile);
@@ -322,7 +423,6 @@
                     }
                 });
 
-                // Submit via Fetch
                 fetch(form.action, {
                     method: 'POST',
                     body: formData,
@@ -339,21 +439,17 @@
                             showCancelButton: true,
                             confirmButtonText: 'Đồng ý',
                             cancelButtonText: 'Xem danh sách tin đã đăng',
-                            customClass: {
-                                confirmButton: 'bg-teal-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-teal-700 transition-colors mx-2',
-                                cancelButton: 'bg-gray-100 text-gray-700 px-6 py-2.5 rounded-xl font-bold hover:bg-gray-200 transition-colors mx-2'
-                            },
-                            buttonsStyling: false
+                            confirmButtonColor: '#0d9488',
+                            cancelButtonColor: '#6b7280'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                // Quay lại form nhập (reset trang)
-                                window.location.reload();
+                                window.location.href = "{{ route('property.post') }}";
                             } else if (result.dismiss === Swal.DismissReason.cancel) {
-                                // Xem danh sách tin (hiện tại chưa có view nên tạm để #)
                                 window.location.href = "/quan-ly-tin-dang"; 
                             }
                         });
                     } else {
+                        this.hasSubmitted = false;
                         response.json().then(data => {
                             if (data.errors) {
                                 SwalError.fire({ title: 'Dữ liệu không hợp lệ!', text: Object.values(data.errors).flat().join(' | ') });
@@ -364,6 +460,7 @@
                     }
                 })
                 .catch(error => {
+                    this.hasSubmitted = false;
                     SwalError.fire({ title: 'Lỗi kết nối!', text: 'Vui lòng thử lại sau.' });
                 })
                 .finally(() => {

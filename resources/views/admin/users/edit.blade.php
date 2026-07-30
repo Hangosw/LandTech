@@ -128,15 +128,23 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        @if($property->status == 'active')
-                                            <span class="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-700">Đang hiển thị</span>
-                                        @elseif($property->status == 'pending')
-                                            <span class="px-3 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-700">Chờ duyệt</span>
-                                        @elseif($property->status == 'sold' || $property->status == 'rented')
-                                            <span class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-700">Đã chốt</span>
-                                        @else
-                                            <span class="px-3 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-600">Đã ẩn</span>
-                                        @endif
+                                         @if($property->status == 'sansangchothue')
+                                             <span class="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-700">Sẵn sàng cho thuê</span>
+                                         @elseif($property->status == 'choduyet')
+                                             <span class="px-3 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-700">Chờ duyệt</span>
+                                         @elseif($property->status == 'dachothue')
+                                             <span class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-700">Đã cho thuê</span>
+                                         @elseif($property->status == 'nhap')
+                                             <span class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700">Nháp</span>
+                                         @elseif($property->status == 'hethantin')
+                                             <span class="px-3 py-1 rounded-lg text-xs font-bold bg-rose-100 text-rose-700">Hết hạn tin</span>
+                                         @elseif($property->status == 'ngungkhaithac')
+                                             <span class="px-3 py-1 rounded-lg text-xs font-bold bg-purple-100 text-purple-700">Ngừng khai thác</span>
+                                         @elseif($property->status == 'bigovipham')
+                                             <span class="px-3 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700">Bị gỡ (vi phạm)</span>
+                                         @else
+                                             <span class="px-3 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-600">Tạm ẩn</span>
+                                         @endif
                                     </td>
                                 </tr>
                             @empty
