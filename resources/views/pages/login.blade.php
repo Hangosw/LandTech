@@ -39,7 +39,7 @@
     width: 52px;
     height: 52px;
     border-radius: 14px;
-    background: oklch(58% 0.13 218);
+    background: #0F3460;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -122,7 +122,7 @@
 }
 
 .role-radio:checked + .role-card-label {
-    border-color: oklch(58% 0.13 218);
+    border-color: #0F3460;
     background: oklch(97% 0.02 218);
     color: oklch(51% 0.12 218);
 }
@@ -133,7 +133,7 @@
 }
 
 .role-radio:checked + .role-card-label i {
-    color: oklch(58% 0.13 218);
+    color: #0F3460;
 }
 
 .role-card-label span {
@@ -271,7 +271,7 @@
 }
 
 .form-input:focus {
-    border-color: oklch(58% 0.13 218);
+    border-color: #0F3460;
     background: #ffffff;
     box-shadow: 0 0 0 3px oklch(93% 0.04 218);
 }
@@ -292,7 +292,7 @@
 .btn-primary {
     width: 100%;
     padding: 0.875rem 1rem;
-    background: oklch(58% 0.13 218);
+    background: #0F3460;
     color: #ffffff;
     font-size: 0.9375rem;
     font-weight: 700;
@@ -333,7 +333,7 @@
 }
 
 .login-footer a {
-    color: oklch(58% 0.13 218);
+    color: #0F3460;
     font-weight: 700;
     text-decoration: none;
     transition: opacity 0.15s ease;

@@ -11,6 +11,7 @@ use App\Http\Controllers\WishlistController;
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/thue', [PageController::class, 'rentList'])->name('rent.list');
 Route::get('/thue/{slug}', [PageController::class, 'rentDetail'])->name('rent.detail');
+Route::get('/chu-nha', [PageController::class, 'owner'])->name('owner');
 Route::get('/dang-tin', [PageController::class, 'postProperty'])->name('property.post');
 Route::post('/dang-tin', [PropertyController::class, 'store'])->name('property.post.submit');
 Route::post('/dang-tin/draft', [PropertyController::class, 'saveDraft'])->name('property.draft.save');
@@ -53,6 +54,8 @@ Route::post('/auth/unlink-provider/{provider}', [AuthController::class, 'unlinkP
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+    Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
     Route::post('/users/{id}/status', [AdminUserController::class, 'updateStatus'])->name('users.status');
     Route::get('/users/{id}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{id}', [AdminUserController::class, 'update'])->name('users.update');
@@ -64,5 +67,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/properties/{id}/edit', [\App\Http\Controllers\PropertiesController::class, 'edit'])->name('properties.edit');
     Route::put('/properties/{id}', [\App\Http\Controllers\PropertiesController::class, 'update'])->name('properties.update');
     Route::delete('/properties/{id}', [\App\Http\Controllers\PropertiesController::class, 'destroy'])->name('properties.destroy');
+
+    // Projects (/du-an catalog)
+    Route::get('/projects', [\App\Http\Controllers\ProjectsController::class, 'index'])->name('projects.index');
+    Route::get('/projects/create', [\App\Http\Controllers\ProjectsController::class, 'create'])->name('projects.create');
+    Route::post('/projects', [\App\Http\Controllers\ProjectsController::class, 'store'])->name('projects.store');
+    Route::get('/projects/{id}/edit', [\App\Http\Controllers\ProjectsController::class, 'edit'])->name('projects.edit');
+    Route::put('/projects/{id}', [\App\Http\Controllers\ProjectsController::class, 'update'])->name('projects.update');
+    Route::post('/projects/{id}/toggle', [\App\Http\Controllers\ProjectsController::class, 'toggle'])->name('projects.toggle');
+    Route::delete('/projects/{id}', [\App\Http\Controllers\ProjectsController::class, 'destroy'])->name('projects.destroy');
+
+    // Roles & Permissions
+    Route::get('/roles', [\App\Http\Controllers\Admin\RoleController::class, 'index'])->name('roles.index');
+    Route::post('/roles', [\App\Http\Controllers\Admin\RoleController::class, 'store'])->name('roles.store');
+    Route::get('/roles/{id}/edit', [\App\Http\Controllers\Admin\RoleController::class, 'edit'])->name('roles.edit');
+    Route::put('/roles/{id}', [\App\Http\Controllers\Admin\RoleController::class, 'update'])->name('roles.update');
+    Route::delete('/roles/{id}', [\App\Http\Controllers\Admin\RoleController::class, 'destroy'])->name('roles.destroy');
+    Route::post('/permissions', [\App\Http\Controllers\Admin\RoleController::class, 'storePermission'])->name('permissions.store');
+    Route::delete('/permissions/{id}', [\App\Http\Controllers\Admin\RoleController::class, 'destroyPermission'])->name('permissions.destroy');
 });
 

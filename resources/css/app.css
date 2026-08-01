@@ -1,25 +1,39 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-teal-50: oklch(97% 0.02 218);
-  --color-teal-100: oklch(93% 0.04 218);
-  --color-teal-200: oklch(86% 0.07 218);
-  --color-teal-300: oklch(79% 0.10 218);
-  --color-teal-400: oklch(71% 0.12 218);
-  --color-teal-500: oklch(64% 0.13 218);
-  --color-teal-600: oklch(58% 0.13 218); /* Brand oklch(58% .13 218) */
-  --color-teal-700: oklch(51% 0.12 218);
-  --color-teal-800: oklch(43% 0.11 218);
-  --color-teal-900: oklch(34% 0.09 218);
-  --color-teal-950: oklch(23% 0.06 218);
+  /* Brand: Navy #0F3460 — remap legacy teal-* utilities sitewide */
+  --color-teal-50: #EBF3FF;
+  --color-teal-100: #D6E6F7;
+  --color-teal-200: #B9D2F0;
+  --color-teal-300: #8FB1DE;
+  --color-teal-400: #5B8AC9;
+  --color-teal-500: #1A56A8;
+  --color-teal-600: #0F3460;
+  --color-teal-700: #0C2A4D;
+  --color-teal-800: #0A2547;
+  --color-teal-900: #071A33;
+  --color-teal-950: #04101F;
+
+  /* Explicit navy / amber tokens */
+  --color-navy: #0F3460;
+  --color-navy-deep: #0a2547;
+  --color-navy-mid: #123a6e;
+  --color-navy-soft: #1A56A8;
+  --color-amber-brand: #F59E0B;
+  --color-navy-mist: #EBF3FF;
+  --color-navy-muted: #B9D2F0;
+  --color-amber-50: #FFFBEB;
+  --color-amber-100: #FEF3C7;
   
-  --color-muted-foreground: oklch(52% 0.03 230);
-  --color-primary: oklch(58% 0.13 218);
-  --color-footer-bg: oklch(97% 0.02 218);
+  --color-muted-foreground: #6B7280;
+  --color-primary: #0F3460;
+  --color-footer-bg: #0a2547;
 }
 
 :root {
   color-scheme: light;
+  --brand-navy: #0F3460;
+  --brand-amber: #F59E0B;
 }
 
 html, body {
@@ -32,6 +46,10 @@ body {
   background-color: #f8fafc;
   color: #0f172a;
   width: 100%;
+}
+
+[x-cloak] {
+  display: none !important;
 }
 
 /* Hero helpers */
@@ -57,3 +75,9 @@ body {
   max-width: 72rem; /* 1152px (max-w-6xl) */
 }
 
+/* Accent utility for amber CTAs */
+.accent-amber {
+  accent-color: #F59E0B;
+}
+
+.accent-navy { accent-color: #0F3460; }

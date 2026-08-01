@@ -69,11 +69,78 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Trạng thái</label>
                         <select name="status" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer">
-                            <option value="active" {{ old('status', $user->status) == 'active' ? 'selected' : '' }}>Đã duyệt (Active)</option>
+                            <option value="active" {{ old('status', $user->status) == 'active' ? 'selected' : '' }}>Kích hoạt (Active)</option>
                             <option value="pending" {{ old('status', $user->status) == 'pending' ? 'selected' : '' }}>Chờ duyệt (Pending)</option>
-                            <option value="inactive" {{ old('status', $user->status) == 'inactive' ? 'selected' : '' }}>Tạm khóa (Inactive)</option>
+                            <option value="inactive" {{ old('status', $user->status) == 'inactive' ? 'selected' : '' }}>Vô hiệu hóa (Inactive)</option>
                             <option value="banned" {{ old('status', $user->status) == 'banned' ? 'selected' : '' }}>Cấm (Banned)</option>
                         </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Mật khẩu mới</label>
+                        <input type="password" name="password" minlength="6" placeholder="Để trống nếu không đổi"
+                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Xác nhận mật khẩu mới</label>
+                        <input type="password" name="password_confirmation" minlength="6" placeholder="Nhập lại mật khẩu mới"
+                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                    </div>
+                </div>
+
+                <!-- PERMISSION SECTION -->
+                <div id="permission-section" class="mt-8 pt-6 border-t border-gray-200">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-extrabold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-user-shield text-primary"></i> Phân Quyền &amp; Vai Trò Spatie Cho Tài Khoản Này
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-1 font-medium">Gán vai trò chính và các quyền trực tiếp riêng cho tài khoản: <strong class="text-gray-800">{{ $user->name }}</strong></p>
+                    </div>
+
+                    <!-- 1. Roles Selection -->
+                    <div class="mb-6 bg-slate-50 p-4 rounded-xl border border-gray-200">
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Vai trò (Roles) áp dụng:</label>
+                        <div class="flex flex-wrap gap-3">
+                            @foreach($roles as $role)
+                                <label class="inline-flex items-center gap-2 bg-white px-3.5 py-2 rounded-lg border border-gray-200 text-sm font-bold text-gray-800 cursor-pointer hover:border-primary transition-colors">
+                                    <input type="checkbox" name="roles[]" value="{{ $role->name }}"
+                                           {{ in_array($role->name, $userRoles) ? 'checked' : '' }}
+                                           class="w-4 h-4 accent-primary rounded cursor-pointer">
+                                    <span>{{ strtoupper($role->name) }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- 2. Direct Permissions Selection -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-gray-200">
+                        <input type="hidden" name="direct_permissions_submitted" value="1">
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Quyền hạn trực tiếp (Direct Permissions riêng cho tài khoản):</label>
+
+                        @foreach($groupedPermissions as $groupName => $groupPerms)
+                            <div class="mb-4 last:mb-0">
+                                <div class="text-xs font-extrabold text-primary uppercase tracking-wide mb-2 flex items-center gap-1.5 border-b border-gray-200 pb-1">
+                                    <i class="fas fa-layer-group"></i> {{ $groupName }}
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                    @foreach($groupPerms as $perm)
+                                        @php
+                                            $isViaRole = $user->hasPermissionTo($perm->name) && !in_array($perm->name, $userDirectPermissions);
+                                        @endphp
+                                        <label class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-700 cursor-pointer hover:border-primary transition-colors">
+                                            <input type="checkbox" name="direct_permissions[]" value="{{ $perm->name }}"
+                                                   {{ in_array($perm->name, $userDirectPermissions) ? 'checked' : '' }}
+                                                   class="w-4 h-4 accent-primary rounded cursor-pointer">
+                                            <span class="truncate" title="{{ $perm->name }}">{{ $perm->name }}</span>
+                                            @if($isViaRole)
+                                                <span class="ml-auto text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-extrabold" title="Quyền này được thừa hưởng từ Vai trò">Từ Role</span>
+                                            @endif
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 

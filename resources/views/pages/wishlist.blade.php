@@ -42,8 +42,8 @@
         margin-left: 0.5rem;
     }
     .dt-search input:focus {
-        border-color: oklch(58% 0.13 218);
-        box-shadow: 0 0 0 2px oklch(58% 0.13 218 / 20%);
+        border-color: #0F3460;
+        box-shadow: 0 0 0 2px rgba(15,52,96,0.20);
     }
 
     .dt-length label { font-size: 0.875rem; font-weight: 500; color: #6b7280; margin-left: 0.5rem; }
@@ -77,7 +77,7 @@
         color: #111827 !important;
     }
     .dt-paging-button.current {
-        background-color: oklch(58% 0.13 218) !important;
+        background-color: #0F3460 !important;
         color: white !important;
         box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
     }

@@ -1,21 +1,158 @@
 @extends('layouts.app')
 
-@section('title', $property->title . ' — LANDTEK')
-@section('description', Str::limit($property->description ?? '', 160))
+@php
+    /* ── Share / SEO preview ── */
+    $shareTitle = trim((string) ($property->title ?? ''));
+    if (
+        mb_strlen($shareTitle, 'UTF-8') > 6
+        && $shareTitle === mb_strtoupper($shareTitle, 'UTF-8')
+        && preg_match('/\p{L}/u', $shareTitle)
+    ) {
+        $lowerTitle = mb_strtolower($shareTitle, 'UTF-8');
+        $shareTitle = mb_strtoupper(mb_substr($lowerTitle, 0, 1, 'UTF-8'), 'UTF-8')
+            .mb_substr($lowerTitle, 1, null, 'UTF-8');
+    }
+
+    $shareLocation = trim((string) ($property->address ?? ''));
+    if ($shareLocation === '') {
+        $shareLocation = trim(($property->district ? $property->district.', ' : '').'Nha Trang');
+    }
+
+    if ($property->monthly_price) {
+        $sharePrice = number_format($property->monthly_price / 1000000, 0, ',', '.').' triệu/tháng';
+    } elseif ($property->price) {
+        $sharePrice = number_format($property->price).' đ';
+    } else {
+        $sharePrice = '';
+    }
+
+    $shareSpecs = collect([
+        $property->area ? (rtrim(rtrim(number_format((float) $property->area, 1, ',', '.'), '0'), ',').' m²') : null,
+        isset($property->bedrooms) ? ($property->bedrooms.' phòng ngủ') : null,
+        isset($property->bathrooms) ? ($property->bathrooms.' WC') : null,
+        $property->type_label ?: null,
+    ])->filter()->implode(' · ');
+
+    $shareDescSnippet = Str::limit(
+        preg_replace('/\s+/u', ' ', trim(strip_tags((string) ($property->description ?? '')))) ?: '',
+        140,
+        '…'
+    );
+
+    $shareMetaDescription = collect([$shareLocation, $sharePrice, $shareSpecs, $shareDescSnippet])
+        ->filter()
+        ->implode(' — ');
+
+    $shareCoverPath = $property->cover_image_url
+        ?: optional($property->media->where('media_type', 'image')->sortBy('display_order')->first())->file_url
+        ?: '/images/hero-nhatrang.jpg';
+    $shareCoverUrl = preg_match('#^https?://#i', $shareCoverPath)
+        ? $shareCoverPath
+        : url($shareCoverPath);
+    // Relative path for JS (tránh APP_URL lệch domain local)
+    $shareCoverRel = preg_match('#^https?://#i', $shareCoverPath)
+        ? $shareCoverPath
+        : (str_starts_with($shareCoverPath, '/') ? $shareCoverPath : '/'.$shareCoverPath);
+    $sharePageUrl = route('rent.detail', $property->slug);
+
+    $shareTextLines = array_filter([
+        '🏠 '.$shareTitle,
+        $shareLocation !== '' ? '📍 '.$shareLocation : null,
+        $sharePrice !== '' ? '💰 '.$sharePrice : null,
+        $shareSpecs !== '' ? '📐 '.$shareSpecs : null,
+        $shareDescSnippet !== '' ? "\n".$shareDescSnippet : null,
+        "\nXem chi tiết trên LANDTEK:",
+    ]);
+    $shareText = implode("\n", $shareTextLines);
+    $shareShortText = collect([
+        $shareLocation !== '' ? $shareLocation : null,
+        $sharePrice !== '' ? $sharePrice : null,
+        $shareSpecs !== '' ? $shareSpecs : null,
+        $shareDescSnippet !== '' ? $shareDescSnippet : null,
+    ])->filter()->implode(' · ');
+@endphp
+
+@section('title', $shareTitle.' — LANDTEK')
+@section('description', Str::limit($shareMetaDescription, 160))
+
+@section('meta')
+    <link rel="canonical" href="{{ $sharePageUrl }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="LANDTEK">
+    <meta property="og:locale" content="vi_VN">
+    <meta property="og:url" content="{{ $sharePageUrl }}">
+    <meta property="og:title" content="{{ $shareTitle }}{{ $sharePrice ? ' | '.$sharePrice : '' }}">
+    <meta property="og:description" content="{{ Str::limit($shareMetaDescription, 200) }}">
+    <meta property="og:image" content="{{ $shareCoverUrl }}">
+    <meta property="og:image:alt" content="{{ $shareTitle }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $shareTitle }}{{ $sharePrice ? ' | '.$sharePrice : '' }}">
+    <meta name="twitter:description" content="{{ Str::limit($shareMetaDescription, 200) }}">
+    <meta name="twitter:image" content="{{ $shareCoverUrl }}">
+@endsection
 
 @section('content')
 @php
-    /* ── Collect all images ── */
+    /* ── Collect images only (videos shown separately) ── */
     $allImages = collect();
     if ($property->cover_image_url) $allImages->push($property->cover_image_url);
-    foreach ($property->media->sortBy('display_order') as $m) {
+    foreach ($property->media->where('media_type', 'image')->sortBy('display_order') as $m) {
         if ($m->file_url && !$allImages->contains($m->file_url)) $allImages->push($m->file_url);
     }
+    // Legacy: media without type or mistyped as image path still in gallery; skip video MIME extensions
+    foreach ($property->media->where('media_type', '!=', 'video')->sortBy('display_order') as $m) {
+        if ($m->media_type === 'image') continue;
+        if (!$m->file_url || $allImages->contains($m->file_url)) continue;
+        $ext = strtolower(pathinfo($m->file_url, PATHINFO_EXTENSION));
+        if (in_array($ext, ['mp4', 'mov', 'avi', 'webm'], true)) continue;
+        $allImages->push($m->file_url);
+    }
     if ($allImages->isEmpty()) $allImages->push('/images/hero-nhatrang.jpg');
+
+    $videos = $property->media->where('media_type', 'video')->sortBy('display_order')->values();
+    // Also catch video files wrongly stored as image
+    foreach ($property->media as $m) {
+        if ($m->media_type === 'video') continue;
+        $ext = strtolower(pathinfo($m->file_url ?? '', PATHINFO_EXTENSION));
+        if (in_array($ext, ['mp4', 'mov', 'avi', 'webm'], true) && $m->file_url) {
+            $videos->push($m);
+        }
+    }
+
+    $hasMapPin = is_numeric($property->lat) && is_numeric($property->lng);
+    $googleMapsLink = $hasMapPin
+        ? 'https://www.google.com/maps?q=' . rawurlencode($property->lat . ',' . $property->lng)
+        : 'https://maps.google.com/?q=' . rawurlencode(($property->address ?? '') . ' ' . (($property->district ? $property->district . ', ' : '') . 'Nha Trang'));
 
     /* ── Labels ── */
     $typeLabel   = $property->type_label;
     $locationStr = ($property->district ? $property->district.', ' : '').'Nha Trang';
+
+    // Address without duplication (demo: "Phước Hải, Nha Trang" once)
+    $rawAddress = trim((string) ($property->address ?? ''));
+    $addrLower = mb_strtolower($rawAddress, 'UTF-8');
+    $districtLower = mb_strtolower((string) ($property->district ?? ''), 'UTF-8');
+    if ($rawAddress === '') {
+        $displayAddress = $locationStr;
+    } elseif (
+        str_contains($addrLower, 'nha trang')
+        || ($districtLower !== '' && str_contains($addrLower, $districtLower))
+    ) {
+        $displayAddress = $rawAddress;
+    } else {
+        $displayAddress = $rawAddress.', '.$locationStr;
+    }
+
+    // Soften ALL-CAPS titles for readability
+    $displayTitle = trim((string) $property->title);
+    if (
+        mb_strlen($displayTitle, 'UTF-8') > 6
+        && $displayTitle === mb_strtoupper($displayTitle, 'UTF-8')
+        && preg_match('/\p{L}/u', $displayTitle)
+    ) {
+        $lower = mb_strtolower($displayTitle, 'UTF-8');
+        $displayTitle = mb_strtoupper(mb_substr($lower, 0, 1, 'UTF-8'), 'UTF-8').mb_substr($lower, 1, null, 'UTF-8');
+    }
 
     /* ── Price display ── */
     if ($property->monthly_price) {
@@ -29,9 +166,39 @@
     }
 
     /* ── Agent info ── */
-    $agentName    = $property->user?->name ?? 'Môi giới';
+    $agentName    = $property->user?->name ?? 'Môi giới LANDTEK';
     $agentPhone   = $property->user?->phone ?? '';
-    $agentInitial = strtoupper(substr($agentName, 0, 1));
+    $nameParts = preg_split('/\s+/u', trim($agentName)) ?: [];
+    if (count($nameParts) >= 2) {
+        $agentInitial = mb_strtoupper(
+            mb_substr($nameParts[0], 0, 1, 'UTF-8').mb_substr(end($nameParts), 0, 1, 'UTF-8'),
+            'UTF-8'
+        );
+    } else {
+        $agentInitial = mb_strtoupper(mb_substr($agentName, 0, 2, 'UTF-8'), 'UTF-8');
+    }
+    $agentListingCount = $agentListingCount ?? 0;
+
+    // Spec helpers from utilities (demo-style feature grid)
+    $utilNames = $property->utilities->pluck('name')->map(fn ($n) => mb_strtolower((string) $n, 'UTF-8'));
+    $hasElevator = $utilNames->contains(fn ($n) => str_contains($n, 'thang máy') || str_contains($n, 'thang may'));
+    $hasParking  = $utilNames->contains(fn ($n) => str_contains($n, 'đậu') || str_contains($n, 'đỗ') || str_contains($n, 'parking') || str_contains($n, 'gara'));
+    $hasWifi     = $utilNames->contains(fn ($n) => str_contains($n, 'wifi') || str_contains($n, 'wi-fi'));
+
+    $specItems = collect([
+        ['icon' => '📐', 'label' => 'Diện tích', 'value' => $property->area ? ($property->area.' m²') : null],
+        ['icon' => '🛏️', 'label' => 'Phòng ngủ', 'value' => $property->bedrooms !== null ? ($property->bedrooms.' phòng') : null],
+        ['icon' => '🚿', 'label' => 'WC', 'value' => $property->bathrooms !== null ? ($property->bathrooms.' phòng') : null],
+        ['icon' => '🏠', 'label' => 'Loại BĐS', 'value' => $typeLabel],
+        ['icon' => '🏗️', 'label' => 'Dự án', 'value' => $property->project ?: null],
+        ['icon' => '🌊', 'label' => 'Cách biển', 'value' => $property->distance_to_beach ? (number_format($property->distance_to_beach).'m') : null],
+        ['icon' => '📅', 'label' => 'Thuê tối thiểu', 'value' => $property->min_rent_period ? ($property->min_rent_period.' tháng') : null],
+        ['icon' => '🛗', 'label' => 'Thang máy', 'value' => $hasElevator ? 'Có' : null],
+        ['icon' => '🅿️', 'label' => 'Chỗ đậu xe', 'value' => $hasParking ? 'Có' : null],
+        ['icon' => '📶', 'label' => 'Wifi', 'value' => $hasWifi ? 'Có' : null],
+        ['icon' => '📋', 'label' => 'Hình thức', 'value' => $property->transaction_type === 'sale' ? 'Mua bán' : 'Cho thuê'],
+        ['icon' => '✅', 'label' => 'Trạng thái', 'value' => $property->status_label ?? null],
+    ])->filter(fn ($s) => filled($s['value']))->values();
 @endphp
 
 {{-- ══════════════════════════════════════════════════
@@ -91,7 +258,9 @@
 .mob-carousel-count {
     position: absolute;
     bottom: 12px;
-    right: 14px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
     background: rgba(0,0,0,.45);
     color: #fff;
     font-size: 11px;
@@ -472,7 +641,7 @@
         align-items: center;
         justify-content: center;
         gap: 6px;
-        background: #0d9488;
+        background: #0F3460;
         color: #fff;
         cursor: pointer;
         text-decoration: none;
@@ -482,20 +651,20 @@
     .mob-btn-zalo {
         flex: 1; height: 44px;
         border-radius: 12px;
-        border: 1.5px solid #99f6e4;
+        border: 1.5px solid #B9D2F0;
         font-size: 13px;
         font-weight: 700;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 6px;
-        background: #f0fdfa;
+        background: #EBF3FF;
         color: #0f766e;
         cursor: pointer;
         text-decoration: none;
         transition: background .2s;
     }
-    .mob-btn-zalo:hover { background: #ccfbf1; }
+    .mob-btn-zalo:hover { background: #EBF3FF; }
     /* Push content above sticky bar */
     .mob-bottom-spacer { height: 80px; }
 }
@@ -505,8 +674,8 @@
 }
 </style>
 
-{{-- ────────────────────────── BREADCRUMB ────────────────────────── --}}
-<div class="bg-white border-b border-gray-100 py-3">
+{{-- ────────────────────────── BREADCRUMB (desktop) ────────────────────────── --}}
+<div class="bg-white border-b border-gray-100 py-3 hidden lg:block">
     <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <nav class="flex items-center gap-1.5 text-xs text-gray-500">
             <a href="{{ route('home') }}" class="hover:text-teal-600 transition-colors">Trang chủ</a>
@@ -520,13 +689,18 @@
     </div>
 </div>
 
+@php
+    $prevProperty = $prevProperty ?? null;
+    $nextProperty = $nextProperty ?? null;
+@endphp
+
 {{-- ══════════════════════════════════════════════════
      MOBILE LAYOUT (< lg) — hidden on desktop
 ══════════════════════════════════════════════════ --}}
 <div class="lg:hidden mob-only" id="mob-layout">
 
     {{-- ── 1. MOBILE CAROUSEL ── --}}
-    <div class="mob-carousel" id="mobCarousel">
+    <div class="mob-carousel group" id="mobCarousel">
 
         {{-- Appbar overlay --}}
         <div class="mob-carousel-appbar">
@@ -540,6 +714,15 @@
                 </button>
             </div>
         </div>
+
+        {{-- Listing Back / Next on main photo --}}
+        <x-property-detail-nav
+            variant="overlay"
+            :prev-url="$prevProperty ? route('rent.detail', $prevProperty->slug) : null"
+            :next-url="$nextProperty ? route('rent.detail', $nextProperty->slug) : null"
+            :prev-title="$prevProperty?->title"
+            :next-title="$nextProperty?->title"
+        />
 
         {{-- Carousel track --}}
         <div class="mob-carousel-track" id="mobTrack">
@@ -561,22 +744,40 @@
         <div class="mob-carousel-count" id="mobCounter">1/{{ $allImages->count() }}</div>
     </div>
 
+    @if($videos->isNotEmpty())
+    <div class="mob-section" style="background:#0F3460;border-bottom:none;padding-top:14px;padding-bottom:16px">
+        <div class="mob-section-title" style="color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span style="display:inline-flex;width:28px;height:28px;border-radius:8px;background:#F59E0B;color:#0F3460;align-items:center;justify-content:center;font-size:12px">▶</span>
+            Video tham quan
+        </div>
+        <p style="font-size:11px;color:rgba(255,255,255,.55);margin:0 0 12px">Khối riêng — không nằm trong album ảnh phía trên</p>
+        <div style="display:flex;flex-direction:column;gap:12px">
+            @foreach($videos as $vid)
+                <div style="border-radius:12px;overflow:hidden;background:#000;aspect-ratio:16/9">
+                    <video src="{{ $vid->file_url }}" controls playsinline preload="metadata"
+                           style="width:100%;height:100%;object-fit:contain;display:block;background:#000"></video>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     {{-- ── 2. PRICE & TITLE BLOCK ── --}}
     <div class="mob-price-block">
         <div class="mob-price-row">
             <span class="mob-price-big">{{ $priceFullLabel }}</span>
             <span class="mob-price-badge">✓ Đã xác thực</span>
         </div>
-        <div class="mob-title">{{ $property->title }}</div>
+        <div class="mob-title">{{ $displayTitle }}</div>
         <div class="mob-addr">
             <span>📍</span>
-            <span>{{ $property->address ? $property->address.', ' : '' }}{{ $locationStr }}</span>
+            <span>{{ $displayAddress }}</span>
         </div>
 
         {{-- Quick stats --}}
         <div class="mob-stats-row">
             <div class="mob-stat-item">
-                <div class="mob-stat-val">{{ $property->area }} m²</div>
+                <div class="mob-stat-val">{{ $property->area ? $property->area.' m²' : '—' }}</div>
                 <div class="mob-stat-lbl">Diện tích</div>
             </div>
             <div class="mob-stat-sep"></div>
@@ -603,74 +804,15 @@
     <div class="mob-section">
         <div class="mob-section-title">Đặc điểm bất động sản</div>
         <div class="mob-spec-grid">
-            <div class="mob-spec-item">
-                <div class="mob-spec-icon">📐</div>
-                <div>
-                    <div class="mob-spec-lbl">Diện tích</div>
-                    <div class="mob-spec-val">{{ $property->area }} m²</div>
+            @foreach($specItems as $spec)
+                <div class="mob-spec-item">
+                    <div class="mob-spec-icon">{{ $spec['icon'] }}</div>
+                    <div>
+                        <div class="mob-spec-lbl">{{ $spec['label'] }}</div>
+                        <div class="mob-spec-val">{{ $spec['value'] }}</div>
+                    </div>
                 </div>
-            </div>
-            @if($property->bedrooms)
-            <div class="mob-spec-item">
-                <div class="mob-spec-icon">🛏️</div>
-                <div>
-                    <div class="mob-spec-lbl">Phòng ngủ</div>
-                    <div class="mob-spec-val">{{ $property->bedrooms }} phòng</div>
-                </div>
-            </div>
-            @endif
-            @if($property->bathrooms)
-            <div class="mob-spec-item">
-                <div class="mob-spec-icon">🚿</div>
-                <div>
-                    <div class="mob-spec-lbl">Phòng tắm</div>
-                    <div class="mob-spec-val">{{ $property->bathrooms }} phòng</div>
-                </div>
-            </div>
-            @endif
-            <div class="mob-spec-item">
-                <div class="mob-spec-icon">🏠</div>
-                <div>
-                    <div class="mob-spec-lbl">Loại BĐS</div>
-                    <div class="mob-spec-val">{{ $typeLabel }}</div>
-                </div>
-            </div>
-            @if($property->transaction_type)
-            <div class="mob-spec-item">
-                <div class="mob-spec-icon">📋</div>
-                <div>
-                    <div class="mob-spec-lbl">Hình thức</div>
-                    <div class="mob-spec-val">{{ $property->transaction_type === 'rent' ? 'Cho thuê' : 'Mua bán' }}</div>
-                </div>
-            </div>
-            @endif
-            @if($property->min_rent_period)
-            <div class="mob-spec-item">
-                <div class="mob-spec-icon">📅</div>
-                <div>
-                    <div class="mob-spec-lbl">Thuê tối thiểu</div>
-                    <div class="mob-spec-val">{{ $property->min_rent_period }} tháng</div>
-                </div>
-            </div>
-            @endif
-            @if($property->distance_to_beach)
-            <div class="mob-spec-item">
-                <div class="mob-spec-icon">🌊</div>
-                <div>
-                    <div class="mob-spec-lbl">Cách biển</div>
-                    <div class="mob-spec-val">{{ number_format($property->distance_to_beach) }}m</div>
-                </div>
-            </div>
-            @endif
-            @if($property->project)
-            <div class="mob-spec-item">
-                <div class="mob-spec-icon">🏗️</div>
-                <div>
-                    <div class="mob-spec-lbl">Dự án</div>
-                    <div class="mob-spec-val">{{ $property->project }}</div>
-                </div>
-            </div>
-            @endif
+            @endforeach
         </div>
     </div>
 
@@ -678,10 +820,8 @@
     @if($property->description)
     <div class="mob-section">
         <div class="mob-section-title">Mô tả</div>
-        <div class="mob-desc-text mob-clamped" id="mobDescText">
-            {{ $property->description }}
-        </div>
-        <button class="mob-see-more-btn" id="mobSeeMoreBtn" onclick="mobToggleDesc()">
+        <div class="mob-desc-text mob-clamped" id="mobDescText">{{ trim($property->description) }}</div>
+        <button type="button" class="mob-see-more-btn" id="mobSeeMoreBtn" onclick="mobToggleDesc()">
             Xem thêm <span id="mobSeeMoreIcon">⌄</span>
         </button>
     </div>
@@ -709,29 +849,14 @@
     {{-- ── 6. VỊ TRÍ ── --}}
     <div class="mob-section">
         <div class="mob-section-title">Vị trí</div>
-        @if($property->lat && $property->lng)
-            {{-- Has coordinates: show map with tap overlay --}}
-            <div style="position:relative; border-radius:12px; overflow:hidden; height:140px;">
-                <iframe
-                    src="https://www.openstreetmap.org/export/embed.html?bbox={{ $property->lng - 0.012 }},{{ $property->lat - 0.009 }},{{ $property->lng + 0.012 }},{{ $property->lat + 0.009 }}&layer=mapnik&marker={{ $property->lat }},{{ $property->lng }}"
-                    style="width:100%;height:100%;border:0;" loading="lazy" title="Vị trí">
-                </iframe>
-                {{-- Tap-to-open overlay --}}
-                <a href="https://maps.google.com/?q={{ $property->lat }},{{ $property->lng }}" target="_blank"
-                   style="position:absolute;inset:0;z-index:5;display:flex;align-items:flex-end;justify-content:flex-end;padding:8px;text-decoration:none;">
-                    <span style="background:#fff;color:#0F3460;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15);">
-                        🗺️ Mở Google Maps
-                    </span>
-                </a>
-            </div>
-        @else
-            {{-- No coordinates: placeholder --}}
-            <div class="mob-map-box"
-                 onclick="window.open('https://maps.google.com/?q={{ urlencode(($property->address ?? '').' '.($locationStr ?? '')) }}', '_blank')">
-                <span class="mob-map-pin">📍</span>
-                <span class="mob-map-label">Chạm để mở bản đồ</span>
-            </div>
-        @endif
+        <p class="mb-2 text-[12px] text-gray-500">📍 {{ $displayAddress }}</p>
+        <div style="position:relative;">
+            <x-map-static-view :lat="$property->lat" :lng="$property->lng" :height="160" rounded="rounded-xl" />
+            <a href="{{ $googleMapsLink }}" target="_blank" rel="noopener"
+               style="position:absolute;left:8px;bottom:8px;z-index:500;background:#fff;color:#0F3460;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15);text-decoration:none;">
+                Mở Google Maps
+            </a>
+        </div>
     </div>
 
     {{-- ── 7. MÔI GIỚI ── --}}
@@ -745,8 +870,8 @@
                     <span class="mob-agent-badge">SILVER</span>
                 </div>
                 <div class="mob-agent-sub">
-                    @if($property->view_count > 0)
-                        {{ number_format($property->view_count) }} lượt xem ·
+                    @if($agentListingCount > 0)
+                        {{ $agentListingCount }} tin đang đăng ·
                     @endif
                     Phản hồi nhanh
                 </div>
@@ -800,12 +925,20 @@
     <div class="hidden lg:flex gap-3" style="height:390px">
 
         {{-- Main image --}}
-        <div class="relative flex-1 min-w-0 rounded-2xl overflow-hidden bg-gray-200 cursor-pointer"
+        <div class="group relative flex-1 min-w-0 rounded-2xl overflow-hidden bg-gray-200 cursor-pointer"
              onclick="openGallery(currentMainIdx)">
             <img id="main-gallery-img"
                  src="{{ $allImages->first() }}"
                  alt="{{ $property->title }}"
                  class="w-full h-full object-cover transition-all duration-400 hover:scale-[1.02]">
+
+            <x-property-detail-nav
+                variant="overlay"
+                :prev-url="$prevProperty ? route('rent.detail', $prevProperty->slug) : null"
+                :next-url="$nextProperty ? route('rent.detail', $nextProperty->slug) : null"
+                :prev-title="$prevProperty?->title"
+                :next-title="$nextProperty?->title"
+            />
         </div>
 
         {{-- 2 × 2 thumbnail grid --}}
@@ -835,6 +968,28 @@
     </div>
 </div>
 
+@if($videos->isNotEmpty())
+<div class="mb-6 rounded-2xl border border-navy/10 bg-navy p-5 md:p-6 text-white">
+    <div class="mb-1 flex items-center gap-2.5">
+        <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-amber-brand text-navy">
+            <i class="fas fa-play"></i>
+        </span>
+        <div>
+            <h2 class="text-lg font-bold leading-tight">Video tham quan</h2>
+            <p class="text-xs text-navy-muted">Khối riêng — không nằm trong album ảnh phía trên</p>
+        </div>
+    </div>
+    <div class="mt-4 grid gap-4 {{ $videos->count() > 1 ? 'md:grid-cols-2' : '' }}">
+        @foreach($videos as $vid)
+            <div class="overflow-hidden rounded-xl bg-black aspect-video">
+                <video src="{{ $vid->file_url }}" controls playsinline preload="metadata"
+                       class="h-full w-full object-contain bg-black"></video>
+            </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 {{-- ────────────────────────── MAIN LAYOUT ────────────────────────── --}}
 <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 items-start">
 
@@ -858,41 +1013,47 @@
 
         {{-- Title --}}
         <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-2">
-            {{ $property->title }}
+            {{ $displayTitle }}
         </h1>
 
         {{-- Location --}}
         <p class="flex items-center gap-1.5 text-sm text-gray-500 mb-5">
             <i class="fas fa-map-marker-alt text-teal-500 text-xs"></i>
-            {{ $property->address ? $property->address.', ' : '' }}{{ $locationStr }}
+            {{ $displayAddress }}
         </p>
 
         {{-- Price --}}
         <div class="flex items-baseline gap-2 mb-6">
-            <span class="text-3xl font-extrabold text-teal-600">{{ $priceBig }}</span>
+            <span class="text-3xl font-extrabold text-navy">{{ $priceBig }}</span>
             @if($priceSub)
                 <span class="text-gray-500 text-base font-normal">{{ $priceSub }}</span>
             @endif
+            <span class="ml-2 inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-[11px] font-bold text-green-700">✓ Đã xác thực</span>
         </div>
 
-        {{-- Stats: 4 boxes --}}
+        {{-- Stats: quick row --}}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             <div class="flex flex-col items-center justify-center bg-white rounded-xl border border-gray-100 shadow-sm py-4 px-2 gap-2">
-                <i class="fas fa-bed text-teal-500 text-xl"></i>
-                <span class="text-sm font-semibold text-gray-700 text-center">{{ $property->bedrooms }} phòng ngủ</span>
+                <i class="fas fa-vector-square text-navy text-xl"></i>
+                <span class="text-sm font-semibold text-gray-700 text-center">{{ $property->area ? $property->area.' m²' : '—' }}</span>
             </div>
             <div class="flex flex-col items-center justify-center bg-white rounded-xl border border-gray-100 shadow-sm py-4 px-2 gap-2">
-                <i class="fas fa-bath text-teal-500 text-xl"></i>
-                <span class="text-sm font-semibold text-gray-700 text-center">{{ $property->bathrooms }} phòng tắm</span>
+                <i class="fas fa-bed text-navy text-xl"></i>
+                <span class="text-sm font-semibold text-gray-700 text-center">{{ $property->bedrooms ?? '—' }} phòng ngủ</span>
             </div>
             <div class="flex flex-col items-center justify-center bg-white rounded-xl border border-gray-100 shadow-sm py-4 px-2 gap-2">
-                <i class="fas fa-vector-square text-teal-500 text-xl"></i>
-                <span class="text-sm font-semibold text-gray-700 text-center">{{ $property->area }} m²</span>
+                <i class="fas fa-bath text-navy text-xl"></i>
+                <span class="text-sm font-semibold text-gray-700 text-center">{{ $property->bathrooms ?? '—' }} WC</span>
             </div>
             @if($property->distance_to_beach)
                 <div class="flex flex-col items-center justify-center bg-white rounded-xl border border-gray-100 shadow-sm py-4 px-2 gap-2">
-                    <i class="fas fa-water text-teal-500 text-xl"></i>
+                    <i class="fas fa-water text-navy text-xl"></i>
                     <span class="text-sm font-semibold text-gray-700 text-center">{{ number_format($property->distance_to_beach) }}m tới biển</span>
+                </div>
+            @else
+                <div class="flex flex-col items-center justify-center bg-white rounded-xl border border-gray-100 shadow-sm py-4 px-2 gap-2">
+                    <i class="fas fa-home text-navy text-xl"></i>
+                    <span class="text-sm font-semibold text-gray-700 text-center">{{ $typeLabel }}</span>
                 </div>
             @endif
         </div>
@@ -910,16 +1071,32 @@
             </button>
         </div>
 
+        {{-- Đặc điểm BĐS --}}
+        <div class="mb-8">
+            <h2 class="text-lg font-bold text-gray-900 mb-3">Đặc điểm bất động sản</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                @foreach($specItems as $spec)
+                    <div class="flex items-center gap-2.5 rounded-xl border border-gray-100 bg-white px-3 py-2.5 shadow-sm">
+                        <span class="text-base shrink-0">{{ $spec['icon'] }}</span>
+                        <div class="min-w-0">
+                            <div class="text-[11px] text-gray-400">{{ $spec['label'] }}</div>
+                            <div class="text-sm font-semibold text-gray-800 truncate">{{ $spec['value'] }}</div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
         {{-- Description --}}
         @if($property->description)
             <div class="mb-8">
                 <h2 class="text-lg font-bold text-gray-900 mb-3">Mô tả</h2>
                 <div class="text-gray-600 text-sm leading-relaxed" id="desc-content">
                     {!! nl2br(e(Str::limit($property->description, 400))) !!}
-                    @if(strlen($property->description) > 400)
+                    @if(mb_strlen($property->description) > 400)
                         <button onclick="expandDesc()" id="desc-btn"
-                                class="text-teal-600 hover:underline font-medium ml-1">Xem thêm</button>
-                        <span id="desc-full" class="hidden">{!! nl2br(e(substr($property->description, 400))) !!}</span>
+                                class="text-navy hover:underline font-medium ml-1">Xem thêm</button>
+                        <span id="desc-full" class="hidden">{!! nl2br(e(mb_substr($property->description, 400))) !!}</span>
                     @endif
                 </div>
             </div>
@@ -929,32 +1106,33 @@
         @if($property->utilities->isNotEmpty())
             <div class="mb-8">
                 <h2 class="text-lg font-bold text-gray-900 mb-3">Tiện ích</h2>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-4">
+                <div class="flex flex-wrap gap-2">
                     @foreach($property->utilities as $util)
-                        <div class="flex items-center gap-2 text-sm text-gray-700">
-                            <i class="fas fa-check text-teal-500 shrink-0 text-xs"></i>
-                            <span>{{ $util->name }}</span>
-                        </div>
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-[#EBF3FF] px-3 py-1.5 text-xs font-semibold text-navy">
+                            @if($util->icon_name)
+                                <i class="{{ $util->icon_name }} text-[11px]"></i>
+                            @else
+                                ✓
+                            @endif
+                            {{ $util->name }}
+                        </span>
                     @endforeach
                 </div>
             </div>
         @endif
 
         {{-- Map --}}
-        @if($property->lat && $property->lng)
-            <div class="mb-8">
-                <h2 class="text-lg font-bold text-gray-900 mb-3">Vị trí</h2>
-                <div class="rounded-2xl overflow-hidden border border-gray-100 shadow-sm" style="height:280px">
-                    <iframe
-                        src="https://www.openstreetmap.org/export/embed.html?bbox={{ $property->lng - 0.012 }},{{ $property->lat - 0.009 }},{{ $property->lng + 0.012 }},{{ $property->lat + 0.009 }}&layer=mapnik&marker={{ $property->lat }},{{ $property->lng }}"
-                        class="w-full h-full border-0" loading="lazy" title="Vị trí">
-                    </iframe>
-                </div>
-                <p class="mt-2 text-xs text-gray-400">
-                    Bản đồ © <a href="https://www.openstreetmap.org/copyright" target="_blank" class="text-teal-600 hover:underline">OpenStreetMap</a> contributors
-                </p>
+        <div class="mb-8">
+            <div class="mb-3 flex items-center justify-between gap-3">
+                <h2 class="text-lg font-bold text-gray-900">Vị trí</h2>
+                <a href="{{ $googleMapsLink }}" target="_blank" rel="noopener"
+                   class="text-xs font-semibold text-navy hover:underline">
+                    Mở Google Maps <i class="fas fa-external-link-alt text-[10px]"></i>
+                </a>
             </div>
-        @endif
+            <p class="mb-2 text-sm text-gray-500">📍 {{ $displayAddress }}</p>
+            <x-map-static-view :lat="$property->lat" :lng="$property->lng" :height="300" class="shadow-sm" />
+        </div>
 
     </div>{{-- end left column --}}
 
@@ -968,8 +1146,13 @@
                     {{ $agentInitial }}
                 </div>
                 <div>
-                    <p class="text-sm font-bold text-gray-900 leading-tight">{{ $agentName }}</p>
-                    <p class="text-xs text-gray-400 mt-0.5">Silver Agent</p>
+                    <p class="text-sm font-bold text-gray-900 leading-tight">{{ $agentName }} <span class="ml-1 rounded bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold text-amber-800">SILVER</span></p>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                        @if($agentListingCount > 0)
+                            {{ $agentListingCount }} tin đang đăng ·
+                        @endif
+                        Phản hồi nhanh
+                    </p>
                 </div>
             </div>
             <div class="flex flex-col gap-2">
@@ -1189,7 +1372,7 @@
                     <button type="button"
                             onclick="mobSelectDate(this,'{{ $dateStr2 }}')"
                             data-date="{{ $dateStr2 }}"
-                            style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;width:44px;padding:10px 0;border-radius:12px;border:1px solid {{ $isAD2 ? '#0d9488' : '#e5e7eb' }};background:{{ $isAD2 ? '#0d9488' : 'transparent' }};color:{{ $isAD2 ? '#fff' : '#4b5563' }};font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
+                            style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;width:44px;padding:10px 0;border-radius:12px;border:1px solid {{ $isAD2 ? '#0F3460' : '#e5e7eb' }};background:{{ $isAD2 ? '#0F3460' : 'transparent' }};color:{{ $isAD2 ? '#fff' : '#4b5563' }};font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;"
                             class="mob-date-btn">
                         <span style="font-size:9px;opacity:.75;text-transform:uppercase;">{{ $dn2 }}</span>
                         <span style="font-size:14px;font-weight:800;margin-top:2px;">{{ $dt2->format('d') }}</span>
@@ -1222,7 +1405,7 @@
             <input type="tel" name="contact_phone" placeholder="Số điện thoại"
                    style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:12px;font-size:13px;outline:none;box-sizing:border-box;">
             <button type="submit"
-                    style="width:100%;background:#0d9488;color:#fff;font-weight:700;padding:12px;border-radius:12px;border:none;font-size:14px;cursor:pointer;transition:opacity .2s;">
+                    style="width:100%;background:#0F3460;color:#fff;font-weight:700;padding:12px;border-radius:12px;border:none;font-size:14px;cursor:pointer;transition:opacity .2s;">
                 Gửi yêu cầu đặt lịch
             </button>
         </form>
@@ -1293,16 +1476,26 @@ function mobToggleDesc() {
     const desc = document.getElementById('mobDescText');
     const icon = document.getElementById('mobSeeMoreIcon');
     const btn  = document.getElementById('mobSeeMoreBtn');
+    if (!desc || !btn) return;
     const expanded = desc.classList.toggle('mob-clamped');
-    // classList.toggle returns the NEW state; true = class was ADDED (now clamped)
     if (expanded) {
-        icon.textContent = '⌄';
+        if (icon) icon.textContent = '⌄';
         btn.childNodes[0].textContent = 'Xem thêm ';
     } else {
-        icon.textContent = '⌃';
+        if (icon) icon.textContent = '⌃';
         btn.childNodes[0].textContent = 'Thu gọn ';
     }
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const desc = document.getElementById('mobDescText');
+    const btn = document.getElementById('mobSeeMoreBtn');
+    if (!desc || !btn) return;
+    // Hide "Xem thêm" when text fits without clamping
+    if (desc.scrollHeight <= desc.clientHeight + 2) {
+        btn.style.display = 'none';
+        desc.classList.remove('mob-clamped');
+    }
+});
 
 // ── Desktop Date & Time picker ───────────────────────────
 function selectDate(btn, date) {
@@ -1329,8 +1522,8 @@ function mobSelectDate(btn, date) {
         b.style.borderColor = '#e5e7eb';
         b.style.color = '#4b5563';
     });
-    btn.style.background = '#0d9488';
-    btn.style.borderColor = '#0d9488';
+    btn.style.background = '#0F3460';
+    btn.style.borderColor = '#0F3460';
     btn.style.color = '#fff';
     document.getElementById('mob_booking_date').value = date;
 }
@@ -1340,8 +1533,8 @@ function mobSelectTime(btn, time) {
         b.style.borderColor = '#e5e7eb';
         b.style.color = '#4b5563';
     });
-    btn.style.background = '#0d9488';
-    btn.style.borderColor = '#0d9488';
+    btn.style.background = '#0F3460';
+    btn.style.borderColor = '#0F3460';
     btn.style.color = '#fff';
     document.getElementById('mob_booking_time').value = time;
 }
@@ -1388,19 +1581,187 @@ function _doWishlistFetch() {
 
 // ── Share ─────────────────────────────────────────────────
 function shareProperty() { mobShare(); }
+
 function mobShare() {
-    if (navigator.share) {
-        navigator.share({ title: '{{ addslashes($property->title) }}', url: window.location.href });
-    } else {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            // Simple toast
-            const toast = document.createElement('div');
-            toast.textContent = '✓ Đã sao chép link!';
-            toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0F3460;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;transition:opacity .3s;';
-            document.body.appendChild(toast);
-            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+    const shareTitle = @json($shareTitle.($sharePrice ? ' | '.$sharePrice : ''));
+    const shareText = @json($shareText);
+    const shortText = @json($shareShortText);
+    const coverUrl = (() => {
+        const raw = @json($shareCoverRel);
+        if (!raw) return '';
+        if (/^https?:\/\//i.test(raw)) return raw;
+        return window.location.origin + (raw.startsWith('/') ? raw : '/' + raw);
+    })();
+    const shareUrl = window.location.href;
+    const fullMessage = shareText + "\n" + shareUrl;
+
+    const showToast = (msg) => {
+        const toast = document.createElement('div');
+        toast.textContent = msg;
+        toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0F3460;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;z-index:10001;transition:opacity .3s;';
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2200);
+    };
+
+    const legacyCopy = (text) => {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        ta.setSelectionRange(0, ta.value.length);
+        let ok = false;
+        try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+        document.body.removeChild(ta);
+        return ok;
+    };
+
+    const copyShareText = async () => {
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(fullMessage);
+                return true;
+            } catch (e) {}
+        }
+        return legacyCopy(fullMessage);
+    };
+
+    let shareEscHandler = null;
+
+    const closeShareModal = () => {
+        if (shareEscHandler) {
+            document.removeEventListener('keydown', shareEscHandler);
+            shareEscHandler = null;
+        }
+        const el = document.getElementById('landtek-share-modal');
+        if (el) el.remove();
+        document.body.style.overflow = '';
+    };
+
+    const openShareModal = () => {
+        closeShareModal();
+        const u = encodeURIComponent(shareUrl);
+        const t = encodeURIComponent(shareTitle);
+        const txt = encodeURIComponent(fullMessage);
+        const links = {
+            facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + u,
+            messenger: 'https://www.facebook.com/dialog/send?link=' + u + '&app_id=966242223397117&redirect_uri=' + u,
+            whatsapp: 'https://wa.me/?text=' + txt,
+            telegram: 'https://t.me/share/url?url=' + u + '&text=' + t,
+            twitter: 'https://twitter.com/intent/tweet?url=' + u + '&text=' + t,
+            linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + u,
+            email: 'mailto:?subject=' + t + '&body=' + txt,
+        };
+        const btnStyle = 'text-align:center;text-decoration:none;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:11px 8px;font-size:12px;font-weight:700;color:#334155;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;';
+
+        const overlay = document.createElement('div');
+        overlay.id = 'landtek-share-modal';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;padding:16px;';
+        overlay.innerHTML = `
+            <div class="landtek-share-panel" style="width:100%;max-width:440px;background:#fff;border-radius:18px;overflow:auto;max-height:min(90vh,640px);box-shadow:0 16px 48px rgba(0,0,0,.25);animation:landtekShareIn .2s ease;">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px;">
+                    <strong style="font-size:16px;color:#0F3460;">Chia sẻ tin đăng</strong>
+                    <button type="button" data-close style="width:32px;height:32px;border:0;border-radius:999px;background:#f1f5f9;color:#64748b;font-size:18px;line-height:1;cursor:pointer;">×</button>
+                </div>
+                <div style="display:flex;gap:12px;padding:8px 16px 14px;border-bottom:1px solid #f1f5f9;">
+                    <img src="${coverUrl.replace(/"/g, '&quot;')}" alt="" style="width:88px;height:88px;object-fit:cover;border-radius:12px;background:#e2e8f0;flex-shrink:0;" onerror="this.style.display='none'">
+                    <div style="min-width:0;flex:1;">
+                        <div style="font-size:14px;font-weight:700;color:#0f172a;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${shareTitle.replace(/</g,'&lt;')}</div>
+                        <div style="margin-top:6px;font-size:12px;color:#64748b;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${(shortText || shareText).replace(/</g,'&lt;')}</div>
+                    </div>
+                </div>
+                <div style="padding:14px 16px 18px;display:grid;gap:10px;">
+                    <button type="button" data-system style="display:none;width:100%;background:#0F3460;color:#fff;border:0;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
+                        <i class="fas fa-share-alt" style="margin-right:6px;"></i> Chia sẻ qua Windows / thiết bị
+                    </button>
+                    <button type="button" data-copy style="width:100%;background:#EBF3FF;color:#0F3460;border:0;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
+                        <i class="fas fa-link" style="margin-right:6px;"></i> Sao chép nội dung &amp; link
+                    </button>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+                        <button type="button" data-zalo style="${btnStyle}color:#0068ff;">
+                            <span style="width:28px;height:28px;border-radius:8px;background:#0068ff;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800;">Z</span>
+                            Zalo
+                        </button>
+                        <a href="${links.facebook}" target="_blank" rel="noopener" style="${btnStyle}color:#1d4ed8;">
+                            <i class="fab fa-facebook" style="font-size:22px;color:#1877f2;"></i>Facebook
+                        </a>
+                        <a href="${links.messenger}" target="_blank" rel="noopener" style="${btnStyle}">
+                            <i class="fab fa-facebook-messenger" style="font-size:22px;color:#0084ff;"></i>Messenger
+                        </a>
+                        <a href="${links.whatsapp}" target="_blank" rel="noopener" style="${btnStyle}">
+                            <i class="fab fa-whatsapp" style="font-size:22px;color:#25d366;"></i>WhatsApp
+                        </a>
+                        <a href="${links.telegram}" target="_blank" rel="noopener" style="${btnStyle}">
+                            <i class="fab fa-telegram" style="font-size:22px;color:#229ed9;"></i>Telegram
+                        </a>
+                        <a href="${links.twitter}" target="_blank" rel="noopener" style="${btnStyle}">
+                            <i class="fab fa-x-twitter" style="font-size:20px;color:#111;"></i>X / Twitter
+                        </a>
+                        <a href="${links.linkedin}" target="_blank" rel="noopener" style="${btnStyle}">
+                            <i class="fab fa-linkedin" style="font-size:22px;color:#0a66c2;"></i>LinkedIn
+                        </a>
+                        <a href="${links.email}" style="${btnStyle}">
+                            <i class="fas fa-envelope" style="font-size:20px;color:#64748b;"></i>Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <style>
+                @keyframes landtekShareIn{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+                @media (max-width:1023px){
+                    #landtek-share-modal{align-items:flex-end!important;padding:12px!important;padding-bottom:max(12px,env(safe-area-inset-bottom))!important}
+                    #landtek-share-modal .landtek-share-panel{border-radius:18px 18px 14px 14px!important}
+                }
+            </style>
+        `;
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay || e.target.closest('[data-close]')) closeShareModal();
         });
-    }
+        shareEscHandler = (e) => {
+            if (e.key === 'Escape' || e.key === 'Esc') {
+                e.preventDefault();
+                closeShareModal();
+            }
+        };
+        document.addEventListener('keydown', shareEscHandler);
+
+        overlay.querySelector('[data-copy]').addEventListener('click', async () => {
+            const ok = await copyShareText();
+            showToast(ok ? '✓ Đã sao chép nội dung chia sẻ!' : 'Không sao chép được — thử chọn text thủ công');
+            if (ok) closeShareModal();
+        });
+
+        const sysBtn = overlay.querySelector('[data-system]');
+        if (typeof navigator.share === 'function' && window.isSecureContext) {
+            sysBtn.style.display = 'block';
+            sysBtn.addEventListener('click', () => {
+                navigator.share({ title: shareTitle, url: shareUrl }).then(closeShareModal).catch((err) => {
+                    if (err && err.name === 'AbortError') return;
+                    showToast('Thiết bị không mở được cửa sổ chia sẻ');
+                });
+            });
+        }
+
+        overlay.querySelector('[data-zalo]').addEventListener('click', async () => {
+            await copyShareText();
+            window.location.href = 'zalo://';
+            showToast('Đã sao chép nội dung — dán vào Zalo để gửi');
+        });
+
+        document.body.style.overflow = 'hidden';
+        document.body.appendChild(overlay);
+        const closeBtn = overlay.querySelector('[data-close]');
+        if (closeBtn) closeBtn.focus();
+    };
+
+    // Luôn mở modal LANDTEK (cover + Zalo/FB/WA...) — giống local.
+    // Share Windows chỉ là nút phụ trong modal (HTTPS), không mở trước để tránh lệch layout production.
+    openShareModal();
 }
 
 // ── Expand description (Desktop) ─────────────────────────
@@ -1474,7 +1835,7 @@ document.getElementById('mob-booking-form').addEventListener('submit', function(
             document.getElementById('mob-booking-modal').classList.add('hidden');
             const toast = document.createElement('div');
             toast.textContent = '✓ Đã gửi yêu cầu đặt lịch!';
-            toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0d9488;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;';
+            toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0F3460;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;';
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
             this.reset();

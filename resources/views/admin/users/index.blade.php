@@ -67,9 +67,9 @@
         gap: 0.5rem;
         font-size: 0.8125rem;
         font-weight: 600;
-        color: oklch(58% 0.13 218);
-        background: oklch(58% 0.13 218 / 8%);
-        border: 1px solid oklch(58% 0.13 218 / 20%);
+        color: #0F3460;
+        background: rgba(15,52,96,0.08);
+        border: 1px solid rgba(15,52,96,0.20);
         padding: 0.5rem 1rem;
         border-radius: 0.75rem;
         text-decoration: none;
@@ -78,8 +78,8 @@
         flex-shrink: 0;
     }
     .btn-back:hover {
-        background: oklch(58% 0.13 218 / 14%);
-        border-color: oklch(58% 0.13 218 / 35%);
+        background: rgba(15,52,96,0.14);
+        border-color: rgba(15,52,96,0.35);
     }
 
     /* ===========================
@@ -110,7 +110,7 @@
         transform: translateY(-2px);
         box-shadow: 0 8px 20px -6px rgba(0,0,0,0.1);
     }
-    .stat-card.total  { border-left-color: oklch(58% 0.13 218); }
+    .stat-card.total  { border-left-color: #0F3460; }
     .stat-card.active { border-left-color: #10b981; }
     .stat-card.pending{ border-left-color: #f59e0b; }
     .stat-icon {
@@ -123,7 +123,7 @@
         font-size: 0.9rem;
         flex-shrink: 0;
     }
-    .stat-icon.blue   { background: oklch(58% 0.13 218 / 10%); color: oklch(58% 0.13 218); }
+    .stat-icon.blue   { background: rgba(15,52,96,0.10); color: #0F3460; }
     .stat-icon.green  { background: #ecfdf5; color: #059669; }
     .stat-icon.amber  { background: #fffbeb; color: #d97706; }
     .stat-info { min-width: 0; }
@@ -193,7 +193,7 @@
         flex-shrink: 0;
     }
     .filter-label i {
-        color: oklch(58% 0.13 218);
+        color: #0F3460;
         font-size: 0.7rem;
     }
     .filter-select {
@@ -217,8 +217,8 @@
         padding-right: 2rem;
     }
     .filter-select:focus {
-        border-color: oklch(58% 0.13 218);
-        box-shadow: 0 0 0 3px oklch(58% 0.13 218 / 12%);
+        border-color: #0F3460;
+        box-shadow: 0 0 0 3px rgba(15,52,96,0.12);
         background-color: white;
     }
     @media (min-width: 1024px) {
@@ -271,8 +271,8 @@
     }
     .search-input::placeholder { color: #94a3b8; }
     .search-input:focus {
-        border-color: oklch(58% 0.13 218);
-        box-shadow: 0 0 0 3px oklch(58% 0.13 218 / 12%);
+        border-color: #0F3460;
+        box-shadow: 0 0 0 3px rgba(15,52,96,0.12);
         background: white;
     }
     .length-select {
@@ -297,8 +297,8 @@
         .length-select { width: auto; }
     }
     .length-select:focus {
-        border-color: oklch(58% 0.13 218);
-        box-shadow: 0 0 0 3px oklch(58% 0.13 218 / 12%);
+        border-color: #0F3460;
+        box-shadow: 0 0 0 3px rgba(15,52,96,0.12);
         background-color: white;
     }
     .filter-divider {
@@ -359,10 +359,10 @@
         color: #0f172a !important;
     }
     .dt-paging-button.current {
-        background: oklch(58% 0.13 218) !important;
+        background: #0F3460 !important;
         color: white !important;
         border-color: transparent !important;
-        box-shadow: 0 2px 8px -2px oklch(58% 0.13 218 / 40%) !important;
+        box-shadow: 0 2px 8px -2px rgba(15,52,96,0.40) !important;
     }
     .dt-paging-button.disabled { opacity: 0.35; cursor: not-allowed; }
 
@@ -381,6 +381,7 @@
         border-bottom: 1px solid #e2e8f0 !important;
         border-top: none !important;
         padding: 0.75rem 0.5rem !important;
+        white-space: nowrap !important;
     }
     table.dataTable tbody tr {
         border-bottom: 1px solid #f1f5f9 !important;
@@ -398,21 +399,29 @@
 
     /* Column widths */
     #usersTable { table-layout: auto; width: 100% !important; }
-    #usersTable th:nth-child(1) { width: 42px; text-align: center; }
-    #usersTable th:nth-child(3) { text-align: right; }
+    #usersTable th:nth-child(1) { width: 50px; text-align: center; }
+    #usersTable th:nth-child(2) { width: 32%; text-align: left; }
+    #usersTable th:nth-child(3) { width: 14%; text-align: left; }
+    #usersTable th:nth-child(4) { width: 18%; text-align: left; }
+    #usersTable th:nth-child(5) { width: 16%; text-align: left; }
+    #usersTable th:nth-child(6) { width: 10%; text-align: right; }
+
     @media (min-width: 1024px) {
         #usersTable { table-layout: fixed; }
-        #usersTable th:nth-child(1) { width: 5%; }
-        #usersTable th:nth-child(2) { width: 80%; }
-        #usersTable th:nth-child(3) { width: 15%; }
+        #usersTable th:nth-child(1) { width: 50px; }
+        #usersTable th:nth-child(2) { width: 32%; }
+        #usersTable th:nth-child(3) { width: 14%; }
+        #usersTable th:nth-child(4) { width: 18%; }
+        #usersTable th:nth-child(5) { width: 16%; }
+        #usersTable th:nth-child(6) { width: 10%; }
     }
 
     /* Responsive child row */
     table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control::before,
     table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control::before {
-        background-color: oklch(58% 0.13 218) !important;
-        border-color: oklch(58% 0.13 218 / 30%) !important;
-        box-shadow: 0 0 0 3px oklch(58% 0.13 218 / 15%) !important;
+        background-color: #0F3460 !important;
+        border-color: rgba(15,52,96,0.30) !important;
+        box-shadow: 0 0 0 3px rgba(15,52,96,0.15) !important;
         width: 14px !important;
         height: 14px !important;
     }
@@ -503,8 +512,8 @@
         transition: all 0.2s;
         flex-shrink: 0;
     }
-    .dropdown-btn:hover { background: #f0fdfa; color: #0d9488; border-color: #99f6e4; }
-    .dropdown-btn.active { background: #f0fdfa; color: #0d9488; border-color: #99f6e4; }
+    .dropdown-btn:hover { background: #EBF3FF; color: #0F3460; border-color: #B9D2F0; }
+    .dropdown-btn.active { background: #EBF3FF; color: #0F3460; border-color: #B9D2F0; }
 
     /* ===========================
        USER CELL
@@ -566,14 +575,19 @@
                     <span>Người dùng</span>
                 </div>
                 <h1 class="page-title">Quản lý Người dùng</h1>
-                <p class="page-subtitle">Quản lý trạng thái và xét duyệt tài khoản đăng ký mới.</p>
+                <p class="page-subtitle">Tạo tài khoản, đặt mật khẩu và kích hoạt / vô hiệu hóa người dùng.</p>
             </div>
-            <a href="{{ route('home') }}" class="btn-back">
-                <i class="fas fa-arrow-left" style="font-size:0.75rem;"></i>
-                Trang chủ
-            </a>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <a href="{{ route('admin.users.create') }}" class="btn-back" style="background:#0F3460;color:#fff;border-color:#0F3460;">
+                    <i class="fas fa-user-plus" style="font-size:0.75rem;"></i>
+                    Thêm người dùng
+                </a>
+                <a href="{{ route('home') }}" class="btn-back">
+                    <i class="fas fa-arrow-left" style="font-size:0.75rem;"></i>
+                    Trang chủ
+                </a>
+            </div>
         </div>
-
         <!-- STAT CARDS -->
         <div class="stat-cards">
             <div class="stat-card total">
@@ -710,16 +724,17 @@
                                     <div class="dropdown-menu-tpl" style="display:none">
                                         <div class="dm-section">
                                             <a href="{{ route('admin.users.edit', $user->id) }}" class="dm-item"><i class="fas fa-edit"></i>Sửa người dùng</a>
+                                            <a href="{{ route('admin.users.edit', $user->id) }}#permission-section" class="dm-item blue"><i class="fas fa-user-shield"></i>Phân quyền tài khoản</a>
                                         </div>
                                         <div class="dm-section">
                                             <form action="{{ route('admin.users.status', $user->id) }}" method="POST" style="margin:0">
                                                 @csrf
                                                 @if($user->status === 'active')
                                                     <input type="hidden" name="status" value="inactive">
-                                                    <button type="submit" class="dm-item amber"><i class="fas fa-lock"></i>Khóa tài khoản</button>
+                                                    <button type="submit" class="dm-item amber"><i class="fas fa-user-slash"></i>Vô hiệu hóa</button>
                                                 @else
                                                     <input type="hidden" name="status" value="active">
-                                                    <button type="submit" class="dm-item green"><i class="fas fa-check-circle"></i>Duyệt tài khoản</button>
+                                                    <button type="submit" class="dm-item green"><i class="fas fa-user-check"></i>Kích hoạt</button>
                                                 @endif
                                             </form>
                                         </div>
@@ -766,7 +781,6 @@
             language: { url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/vi.json' },
             columnDefs: [
                 { searchable: false, orderable: false, targets: 0 },
-                { visible: false, targets: [2, 3, 4] },
                 { orderable: false, targets: 5 }
             ],
             dom: 'rt<"dt-layout-row"ip>',

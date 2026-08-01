@@ -54,6 +54,14 @@ class PageController extends Controller
         
         return view('pages.home', compact('properties', 'projects', 'userWishlists'));
     }
+
+    /**
+     * Owner / asset management landing page
+     */
+    public function owner(): View
+    {
+        return view('pages.owner');
+    }
     
     /**
      * Show rental properties list
@@ -81,7 +89,18 @@ class PageController extends Controller
         }
         
         if ($request->filled('area')) {
-            $query->where('district', $request->area);
+            $area = $request->area;
+            $aliases = [$area];
+            foreach (config('nhatrang_areas', []) as $cfg) {
+                if (($cfg['value'] ?? '') === $area) {
+                    $aliases = array_values(array_unique(array_merge(
+                        [$cfg['value']],
+                        $cfg['legacy'] ?? []
+                    )));
+                    break;
+                }
+            }
+            $query->whereIn('district', $aliases);
         }
         
         if ($request->filled('project')) {
@@ -161,15 +180,16 @@ class PageController extends Controller
             (object)['slug' => 'commercial', 'label' => 'Mặt bằng KD'],
         ];
         
-        $areas = [
-            (object)['slug' => 'Lộc Thọ', 'label' => 'Lộc Thọ'],
-            (object)['slug' => 'Phước Hải', 'label' => 'Phước Hải'],
-            (object)['slug' => 'Phước Long', 'label' => 'Phước Long'],
-            (object)['slug' => 'Vĩnh Hòa', 'label' => 'Vĩnh Hòa'],
-            (object)['slug' => 'Vĩnh Nguyên', 'label' => 'Vĩnh Nguyên'],
-            (object)['slug' => 'Vĩnh Trường', 'label' => 'Vĩnh Trường'],
-            (object)['slug' => 'Tân Lập', 'label' => 'Tân Lập'],
-        ];
+        $areas = collect(config('nhatrang_areas', []))->map(function ($a) {
+            $legacy = $a['legacy'] ?? [];
+            $suffix = $legacy
+                ? ' — cũ: ' . implode(', ', array_slice($legacy, 0, 3)) . (count($legacy) > 3 ? '…' : '')
+                : '';
+            return (object) [
+                'slug' => $a['value'],
+                'label' => ($a['label'] ?? $a['value']) . $suffix,
+            ];
+        })->values();
         
         $projects = json_decode(json_encode($this->getProjects()));
         $amenitiesList = \App\Models\Utility::where('is_active', true)->orderBy('sort_order')->get();
@@ -210,14 +230,25 @@ class PageController extends Controller
             // Ignore in case of concurrent unique constraint violation
         }
         
-        // Similar properties: same type, excluding current, max 4
+        // Similar properties: same type, excluding current / placeholder junk, max 4
         $similar = \App\Models\Property::with(['utilities'])
             ->where('is_searchable', 1)
             ->where('property_type', $property->property_type)
             ->where('id', '!=', $property->id)
+            ->where('title', 'not like', '%test%')
+            ->where('title', 'not like', '%lorem%')
+            ->where('title', 'not like', '%amet%')
+            ->where('title', 'not like', '%dolor%')
             ->orderBy('created_at', 'desc')
             ->take(4)
             ->get();
+
+        $agentListingCount = 0;
+        if ($property->user_id) {
+            $agentListingCount = \App\Models\Property::where('user_id', $property->user_id)
+                ->where('is_searchable', 1)
+                ->count();
+        }
 
         $userBooking = null;
         if (session()->has('last_booking_' . $property->id)) {
@@ -233,7 +264,18 @@ class PageController extends Controller
             }
         }
 
-        return view('pages.rent-detail', compact('property', 'similar', 'userBooking'));
+        $neighbors = $property->detailNeighbors(true);
+        $prevProperty = $neighbors['prev'];
+        $nextProperty = $neighbors['next'];
+
+        return view('pages.rent-detail', compact(
+            'property',
+            'similar',
+            'userBooking',
+            'agentListingCount',
+            'prevProperty',
+            'nextProperty'
+        ));
     }
     
     /**
@@ -256,7 +298,14 @@ class PageController extends Controller
             ->first();
 
         $utilities = \App\Models\Utility::where('is_active', true)->orderBy('sort_order')->get();
-        return view('pages.post-property', compact('utilities', 'draftProperty'));
+        try {
+            $projectOptions = \Illuminate\Support\Facades\Schema::hasTable('projects')
+                ? \App\Models\Project::query()->active()->ordered()->get(['slug', 'label'])
+                : collect();
+        } catch (\Throwable $e) {
+            $projectOptions = collect();
+        }
+        return view('pages.post-property', compact('utilities', 'draftProperty', 'projectOptions'));
     }
     
     public function myProperties(\Illuminate\Http\Request $request): View|\Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
@@ -521,35 +570,98 @@ class PageController extends Controller
     }
 
     /**
-     * Get projects data
+     * Get projects data for homepage / projects page / rent filters
      */
     private function getProjects(): array
+    {
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('projects')) {
+                $rows = \App\Models\Project::query()
+                    ->active()
+                    ->ordered()
+                    ->get();
+
+                if ($rows->isNotEmpty()) {
+                    return $rows->map(fn (\App\Models\Project $p) => [
+                        'slug' => $p->slug,
+                        'label' => $p->label,
+                        'image' => $p->image ?: '/images/hero-nhatrang.jpg',
+                        'district' => $p->district,
+                        'listing_count' => $p->listing_count,
+                        'price_from' => $p->price_from,
+                        'tagline' => $p->tagline,
+                        'description' => $p->description,
+                        'highlights' => $p->highlights ?? [],
+                    ])->all();
+                }
+            }
+        } catch (\Throwable $e) {
+            // Fall through to legacy catalog if DB not ready
+        }
+
+        return $this->legacyProjectsCatalog();
+    }
+
+    /**
+     * Legacy hardcoded catalog (fallback before migration/seed)
+     */
+    private function legacyProjectsCatalog(): array
     {
         return [
             [
                 'slug' => 'muong-thanh',
                 'label' => 'Mường Thanh',
-                'image' => 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80'
+                'image' => '/AnhDuAn/cover_6a6b54aca0831.png',
+                'district' => 'Lộc Thọ / Trần Phú',
+                'listing_count' => 32,
+                'price_from' => '8 triệu/tháng',
+                'tagline' => 'Căn hộ trung tâm, gần biển',
+                'description' => 'Cụm căn hộ Mường Thanh tại trung tâm Nha Trang — tiện nghi đầy đủ, phù hợp khách thuê dài hạn và chuyên gia.',
+                'highlights' => ['Gần biển & trung tâm', 'Nội thất cơ bản / full', 'An ninh 24/7'],
             ],
             [
                 'slug' => 'vinpearl',
                 'label' => 'Vinpearl',
-                'image' => 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=600&q=80'
+                'image' => '/AnhDuAn/cover_6a6b58892d71c.jpg',
+                'district' => 'Đảo Hòn Tre / ven biển',
+                'listing_count' => 18,
+                'price_from' => '15 triệu/tháng',
+                'tagline' => 'Resort sống — view biển cao cấp',
+                'description' => 'Phân khúc căn hộ / villa gắn với hệ sinh thái Vinpearl — hướng tới khách thuê cao cấp, lưu trú dài ngày.',
+                'highlights' => ['View biển / resort', 'Tiện ích nội khu', 'Phù hợp chuyên gia nước ngoài'],
             ],
             [
                 'slug' => 'sun-group',
                 'label' => 'Sun Group',
-                'image' => 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=600&q=80'
+                'image' => '/AnhDuAn/cover_6a6b5864e1e31.png',
+                'district' => 'Nha Trang / Bãi Dài',
+                'listing_count' => 24,
+                'price_from' => '10 triệu/tháng',
+                'tagline' => 'Chuẩn hóa theo dự án Sun',
+                'description' => 'Các căn thuộc hệ sinh thái Sun Group — thiết kế hiện đại, vận hành rõ ràng, dễ cho thuê và quản lý.',
+                'highlights' => ['Thiết kế hiện đại', 'Quản lý chuyên nghiệp', 'Đa dạng diện tích'],
             ],
             [
                 'slug' => 'scenia-bay',
                 'label' => 'Scenia Bay',
-                'image' => 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=600&q=80'
+                'image' => '/AnhDuAn/cover_6a682bee4415a.jpg',
+                'district' => 'Trần Phú, Nha Trang',
+                'listing_count' => 15,
+                'price_from' => '11 triệu/tháng',
+                'tagline' => 'Căn hộ mặt tiền biển Trần Phú',
+                'description' => 'Scenia Bay nằm trên trục Trần Phú — view biển trực diện, phù hợp khách thuê muốn sống gần phố đi bộ và bãi biển.',
+                'highlights' => ['Mặt tiền biển', '2–3 PN phổ biến', 'Full nội thất'],
             ],
             [
                 'slug' => 'gold-coast',
                 'label' => 'Gold Coast',
-                'image' => 'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&w=600&q=80'
+                'image' => '/AnhDuAn/media_6a6b54aca5331.png',
+                'district' => 'Trần Phú, Nha Trang',
+                'listing_count' => 9,
+                'price_from' => '13 triệu/tháng',
+                'tagline' => 'Căn hộ biển cao tầng',
+                'description' => 'Gold Coast — lựa chọn căn hộ biển với tầm nhìn mở, tiện ích nội khu và vị trí thuận tiện di chuyển trung tâm.',
+                'highlights' => ['Tầng cao view đẹp', 'Tiện ích đầy đủ', 'Gần trung tâm'],
             ],
         ];
     }

@@ -27,6 +27,24 @@ class AuthController extends Controller
      */
     public function googleRedirect(Request $request)
     {
+        $clientId = config('services.google.client_id');
+        $clientSecret = config('services.google.client_secret');
+        $redirect = config('services.google.redirect');
+
+        if (blank($clientId) || blank($clientSecret)) {
+            return $this->popupClose(
+                'error',
+                'Google OAuth chưa được cấu hình. Vui lòng thêm GOOGLE_CLIENT_ID và GOOGLE_CLIENT_SECRET vào file .env.'
+            );
+        }
+
+        if (blank($redirect)) {
+            return $this->popupClose(
+                'error',
+                'Thiếu GOOGLE_REDIRECT_URI trong .env (ví dụ: http://localhost:8000/auth/google/callback).'
+            );
+        }
+
         if ($request->has('user_type')) {
             session(['oauth_user_type' => $request->user_type]);
         }

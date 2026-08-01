@@ -32,6 +32,24 @@ class User extends Model
     ];
 
     /**
+     * Boot function to auto-sync Spatie roles when user_type changes or user is created.
+     */
+    protected static function booted(): void
+    {
+        static::created(function ($user) {
+            if (!empty($user->user_type) && in_array($user->user_type, ['admin', 'agent', 'renter'])) {
+                $user->syncRoles([$user->user_type]);
+            }
+        });
+
+        static::updated(function ($user) {
+            if ($user->wasChanged('user_type') && !empty($user->user_type) && in_array($user->user_type, ['admin', 'agent', 'renter'])) {
+                $user->syncRoles([$user->user_type]);
+            }
+        });
+    }
+
+    /**
      * Get the properties posted by this user.
      */
     public function properties(): HasMany

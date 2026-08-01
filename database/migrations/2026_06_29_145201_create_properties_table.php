@@ -24,8 +24,8 @@ return new class extends Migration
             $table->string('address', 500);
             $table->string('district', 100)->nullable();
             $table->string('unit_number', 50)->nullable();
-            $table->decimal('lat', 10, 8)->nullable();
-            $table->decimal('lng', 10, 8)->nullable();
+            $table->decimal('lat', 11, 8)->nullable();
+            $table->decimal('lng', 11, 8)->nullable();
             
             // Room specs
             $table->integer('bedrooms')->nullable();

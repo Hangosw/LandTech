@@ -67,6 +67,92 @@ class Property extends Model
         static::saving(function ($property) {
             $property->is_searchable = ($property->status === 'sansangchothue');
         });
+
+        // Auto-record revision log on property updates
+        static::updated(function ($property) {
+            try {
+                if (!\Illuminate\Support\Facades\Schema::hasTable('property_revisions')) {
+                    return;
+                }
+
+                $ignoredFields = ['updated_at', 'created_at', 'view_count', 'contact_count'];
+                $changes = array_diff_key($property->getChanges(), array_flip($ignoredFields));
+
+                if (empty($changes)) {
+                    return;
+                }
+
+                $original = $property->getOriginal();
+                $oldValues = [];
+                $newValues = [];
+                $changeSummary = [];
+
+                foreach ($changes as $field => $newValue) {
+                    $oldValue = $original[$field] ?? null;
+                    $oldValues[$field] = $oldValue;
+                    $newValues[$field] = $newValue;
+                    $changeSummary[$field] = [
+                        'old' => $oldValue,
+                        'new' => $newValue,
+                    ];
+                }
+
+                $sessionUser = session('user');
+                $userId = $sessionUser ? ($sessionUser->id ?? $sessionUser['id'] ?? null) : auth()->id();
+
+                $action = array_key_exists('status', $changes) ? 'status_changed' : 'updated';
+                if (array_key_exists('active', $changes) && $changes['active'] == 0) {
+                    $action = 'soft_deleted';
+                }
+
+                PropertyRevision::create([
+                    'property_id' => $property->id,
+                    'user_id' => $userId,
+                    'action' => $action,
+                    'changes' => $changeSummary,
+                    'old_values' => $oldValues,
+                    'new_values' => $newValues,
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ]);
+            } catch (\Throwable $e) {
+                // Ignore failure gracefully
+            }
+        });
+
+        static::created(function ($property) {
+            try {
+                if (!\Illuminate\Support\Facades\Schema::hasTable('property_revisions')) {
+                    return;
+                }
+
+                $sessionUser = session('user');
+                $userId = $sessionUser ? ($sessionUser->id ?? $sessionUser['id'] ?? null) : auth()->id();
+
+                $attributes = array_diff_key($property->getAttributes(), array_flip(['updated_at', 'created_at']));
+
+                PropertyRevision::create([
+                    'property_id' => $property->id,
+                    'user_id' => $userId,
+                    'action' => 'created',
+                    'changes' => null,
+                    'old_values' => null,
+                    'new_values' => $attributes,
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ]);
+            } catch (\Throwable $e) {
+                // Ignore failure gracefully
+            }
+        });
+    }
+
+    /**
+     * Get revision history logs for this property.
+     */
+    public function revisions(): HasMany
+    {
+        return $this->hasMany(PropertyRevision::class)->latest();
     }
 
     /**
@@ -83,6 +169,16 @@ class Property extends Model
     public function media(): HasMany
     {
         return $this->hasMany(PropertyMedia::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(PropertyMedia::class)->where('media_type', 'image')->orderBy('display_order');
+    }
+
+    public function videos(): HasMany
+    {
+        return $this->hasMany(PropertyMedia::class)->where('media_type', 'video')->orderBy('display_order');
     }
 
     /**
@@ -168,5 +264,49 @@ class Property extends Model
         ];
 
         return $statusLabels[$this->status] ?? $this->status;
+    }
+
+    /**
+     * Neighbor listings for Back / Next navigation (ordered by id asc).
+     * Wraps around when at either end so both buttons stay useful.
+     *
+     * @return array{prev: ?self, next: ?self}
+     */
+    public function detailNeighbors(bool $publicOnly = true): array
+    {
+        $base = static::query()->select(['id', 'slug', 'title']);
+
+        if ($publicOnly) {
+            $base->where('is_searchable', 1);
+        } else {
+            $base->withoutGlobalScope('active');
+        }
+
+        $prev = (clone $base)
+            ->where('id', '<', $this->id)
+            ->orderByDesc('id')
+            ->first();
+
+        $next = (clone $base)
+            ->where('id', '>', $this->id)
+            ->orderBy('id')
+            ->first();
+
+        // Wrap: last → first, first → last (only when other listings exist)
+        if (! $prev) {
+            $prev = (clone $base)
+                ->where('id', '!=', $this->id)
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        if (! $next) {
+            $next = (clone $base)
+                ->where('id', '!=', $this->id)
+                ->orderBy('id')
+                ->first();
+        }
+
+        return ['prev' => $prev, 'next' => $next];
     }
 }

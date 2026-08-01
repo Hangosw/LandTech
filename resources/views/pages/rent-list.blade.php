@@ -69,18 +69,19 @@
                         <input type="range" name="priceMax" min="3000000" max="30000000" step="1000000" 
                                x-model="price" 
                                onchange="this.form.submit()"
-                               class="w-full accent-teal-600 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                               class="w-full accent-navy h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
                     </div>
 
                     {{-- Khu vực --}}
                     <div class="space-y-2.5">
                         <p class="text-sm font-medium text-gray-900">Khu vực</p>
-                        <select name="area" onchange="this.form.submit()" class="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
-                            <option value="">Tất cả khu vực</option>
-                            @foreach($areas as $a)
-                                <option value="{{ $a->slug }}" {{ request('area') === $a->slug ? 'selected' : '' }}>{{ $a->label }}</option>
-                            @endforeach
-                        </select>
+                        @include('components.area-select', [
+                            'name' => 'area',
+                            'selectedValue' => request('area'),
+                            'placeholder' => 'Tất cả khu vực',
+                            'submitOnChange' => true,
+                            'class' => 'h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:border-navy focus:ring-1 focus:ring-navy',
+                        ])
                     </div>
 
                     {{-- Dự án --}}

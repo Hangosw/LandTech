@@ -1,15 +1,17 @@
-<header class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-3 flex justify-between items-center">
+<header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-[1180px] mx-auto px-4 md:px-6 lg:px-8 py-3 flex justify-between items-center">
 
         {{-- Logo --}}
-        <a href="{{ route('home') }}" class="text-xl font-bold text-teal-600 shrink-0">LANDTEK</a>
+        <a href="{{ route('home') }}" class="text-[22px] font-extrabold text-navy tracking-wide shrink-0">LANDTEK</a>
 
         {{-- Desktop nav --}}
-        <nav class="hidden md:flex gap-8 items-center flex-1 justify-center">
-            <a href="{{ route('rent.list') }}" class="text-gray-700 hover:text-teal-600 font-medium">Thuê nhà</a>
-            <a href="{{ route('projects') }}" class="text-gray-700 hover:text-teal-600 font-medium">Dự án</a>
-            <a href="{{ route('agents') }}" class="text-gray-700 hover:text-teal-600 font-medium">Môi giới</a>
-            <a href="{{ route('wishlist') }}" class="text-gray-700 hover:text-teal-600 font-medium">Yêu thích</a>
+        <nav class="hidden md:flex gap-7 items-center flex-1 justify-center text-[14.5px] font-semibold">
+            {{-- Tạm ẩn: Thuê nhà, Môi giới --}}
+            <a href="{{ route('owner') }}" class="relative text-navy-soft hover:text-navy">
+                Chủ nhà &amp; Quản lý gia sản
+                <span class="absolute -top-2.5 -right-7 rounded bg-amber-brand px-1.5 py-px text-[8px] font-extrabold text-white">MỚI</span>
+            </a>
+            <a href="{{ route('projects') }}" class="text-gray-800 hover:text-navy">Dự án</a>
         </nav>
 
         {{-- Right side actions --}}
@@ -18,8 +20,7 @@
             {{-- ── Đăng tin: primary CTA ── --}}
             <a href="{{ route('property.post') }}"
                class="hdr-btn-post inline-flex items-center justify-center gap-1.5 font-semibold transition-all duration-200 shrink-0
-                      bg-gradient-to-br from-teal-500 to-teal-700 text-white
-                      hover:from-teal-400 hover:to-teal-600 active:scale-95">
+                      bg-navy text-white hover:bg-navy-mid active:scale-95">
                 <i class="fas fa-plus" style="font-size:12px;"></i>
                 <span class="hdr-post-label">Đăng tin</span>
             </a>
@@ -79,7 +80,7 @@
     {{-- Drawer header --}}
     <div style="display:flex; align-items:center; justify-content:space-between;
                 padding:16px 20px; border-bottom:1px solid #f3f4f6; flex-shrink:0;">
-        <span style="font-size:18px; font-weight:800; color:#0d9488;">LANDTEK</span>
+        <span style="font-size:18px; font-weight:800; color:#0F3460;">LANDTEK</span>
         <button onclick="closeMobMenu()"
                 style="width:32px; height:32px; border-radius:50%; border:none; background:#f3f4f6;
                        color:#6b7280; font-size:14px; cursor:pointer; display:flex;
@@ -101,15 +102,15 @@
             }
         @endphp
         <div style="display:flex; align-items:center; gap:12px; padding:14px 20px;
-                    background:#f0fdfa; border-bottom:1px solid #e5e7eb; flex-shrink:0;">
+                    background:#EBF3FF; border-bottom:1px solid #e5e7eb; flex-shrink:0;">
             @if($drawerUser && $drawerUser->avatar_url)
                 <img src="{{ Str::startsWith($drawerUser->avatar_url, 'http') ? $drawerUser->avatar_url : asset($drawerUser->avatar_url) }}"
                      alt="Avatar"
                      style="width:40px; height:40px; border-radius:50%; object-fit:cover; flex-shrink:0;">
             @else
-                <div style="width:40px; height:40px; border-radius:50%; background:#ccfbf1;
+                <div style="width:40px; height:40px; border-radius:50%; background:#EBF3FF;
                             display:flex; align-items:center; justify-content:center;
-                            color:#0d9488; font-size:16px; flex-shrink:0;">
+                            color:#0F3460; font-size:16px; flex-shrink:0;">
                     <i class="fas fa-user"></i>
                 </div>
             @endif
@@ -118,7 +119,7 @@
                           white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                     {{ session('user')->name }}
                 </p>
-                <p style="margin:2px 0 0; font-size:12px; color:#0d9488; font-weight:500;">{{ $drawerRole }}</p>
+                <p style="margin:2px 0 0; font-size:12px; color:#0F3460; font-weight:500;">{{ $drawerRole }}</p>
             </div>
         </div>
     @endif
@@ -126,23 +127,21 @@
     {{-- Nav links --}}
     <nav style="flex:1; overflow-y:auto; padding:8px 0;">
 
-        <a href="{{ route('rent.list') }}" class="mob-drawer-link">
-            <i class="fas fa-home" style="color:#0d9488; width:18px;"></i> Thuê nhà
+        {{-- Tạm ẩn: Thuê nhà, Môi giới --}}
+        <a href="{{ route('owner') }}" class="mob-drawer-link">
+            <i class="fas fa-key" style="color:#0F3460; width:18px;"></i> Chủ nhà &amp; Quản lý gia sản
         </a>
         <a href="{{ route('projects') }}" class="mob-drawer-link">
-            <i class="fas fa-building" style="color:#0d9488; width:18px;"></i> Dự án
-        </a>
-        <a href="{{ route('agents') }}" class="mob-drawer-link">
-            <i class="fas fa-user-tie" style="color:#0d9488; width:18px;"></i> Môi giới
+            <i class="fas fa-building" style="color:#0F3460; width:18px;"></i> Dự án
         </a>
         <a href="{{ route('wishlist') }}" class="mob-drawer-link">
-            <i class="fas fa-heart" style="color:#0d9488; width:18px;"></i> Yêu thích
+            <i class="fas fa-heart" style="color:#0F3460; width:18px;"></i> Yêu thích
         </a>
 
         <div style="margin:8px 20px; border-top:1px solid #f3f4f6;"></div>
 
-        <a href="{{ route('property.post') }}" class="mob-drawer-link" style="color:#0d9488; font-weight:700;">
-            <i class="fas fa-plus-circle" style="color:#0d9488; width:18px;"></i> Đăng tin
+        <a href="{{ route('property.post') }}" class="mob-drawer-link" style="color:#0F3460; font-weight:700;">
+            <i class="fas fa-plus-circle" style="color:#0F3460; width:18px;"></i> Đăng tin
         </a>
 
         @if(session()->has('user'))
@@ -158,13 +157,27 @@
                 </a>
             @endif
 
-            @if(isset($freshUser2) && $freshUser2->user_type === 'admin')
-                <a href="{{ route('admin.users.index') }}" class="mob-drawer-link">
-                    <i class="fas fa-users" style="color:#9ca3af; width:18px;"></i> Người dùng
-                </a>
-                <a href="{{ route('admin.properties.index') }}" class="mob-drawer-link">
-                    <i class="fas fa-building" style="color:#9ca3af; width:18px;"></i> Quản lý tin đăng
-                </a>
+            @if(isset($freshUser2))
+                @if($freshUser2->user_type === 'admin' || $freshUser2->hasPermissionTo('Quản Lý Người Dùng'))
+                    <a href="{{ route('admin.users.index') }}" class="mob-drawer-link">
+                        <i class="fas fa-users" style="color:#9ca3af; width:18px;"></i> Quản lý người dùng
+                    </a>
+                @endif
+                @if($freshUser2->user_type === 'admin')
+                    <a href="{{ route('admin.roles.index') }}" class="mob-drawer-link">
+                        <i class="fas fa-user-shield" style="color:#9ca3af; width:18px;"></i> Phân quyền
+                    </a>
+                @endif
+                @if($freshUser2->user_type === 'admin' || $freshUser2->hasAnyPermission(['Quản Lý Tin Đăng', 'Quản Lý Bất Động Sản']))
+                    <a href="{{ route('admin.properties.index') }}" class="mob-drawer-link">
+                        <i class="fas fa-building" style="color:#9ca3af; width:18px;"></i> Quản lý tin đăng
+                    </a>
+                @endif
+                @if($freshUser2->user_type === 'admin' || $freshUser2->hasPermissionTo('Quản Lý Dự Án'))
+                    <a href="{{ route('admin.projects.index') }}" class="mob-drawer-link">
+                        <i class="fas fa-city" style="color:#9ca3af; width:18px;"></i> Quản lý dự án
+                    </a>
+                @endif
             @endif
 
             <a href="{{ route('profile.edit') }}" class="mob-drawer-link">
@@ -222,9 +235,9 @@
     text-decoration: none;
 }
 .hdr-btn-login:hover {
-    border-color: #0d9488;
-    background: #f0fdfa;
-    color: #0d9488;
+    border-color: #0F3460;
+    background: #EBF3FF;
+    color: #0F3460;
 }
 .hdr-login-label {
     font-size: 13.5px;
@@ -240,9 +253,9 @@
     color: #374151;
 }
 .hdr-avatar-btn:hover {
-    border-color: #0d9488;
-    background: #f0fdfa;
-    color: #0d9488;
+    border-color: #0F3460;
+    background: #EBF3FF;
+    color: #0F3460;
 }
 
 /* Hamburger button */
@@ -255,9 +268,9 @@
     color: #374151;
 }
 .hdr-btn-menu:hover {
-    border-color: #0d9488;
-    background: #f0fdfa;
-    color: #0d9488;
+    border-color: #0F3460;
+    background: #EBF3FF;
+    color: #0F3460;
 }
 
 /* ── Mobile (≤ 767px): icon-only, giống ảnh tham chiếu ── */
@@ -308,8 +321,8 @@
     transition: background 0.15s;
 }
 .mob-drawer-link:hover {
-    background: #f0fdfa;
-    color: #0d9488;
+    background: #EBF3FF;
+    color: #0F3460;
 }
 </style>
 

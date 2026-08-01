@@ -10,7 +10,9 @@
     <div class="relative w-full aspect-[4/3] overflow-hidden bg-gray-100 shrink-0">
         <img src="{{ $property['images'][0] ?? '/images/hero-nhatrang.jpg' }}"
              alt="{{ $property['title'] }}"
-             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+             loading="lazy"
+             onerror="this.onerror=null;this.src='/images/hero-nhatrang.jpg';">
 
         <div class="absolute top-2.5 left-2.5 flex gap-1.5 z-10">
             @if($property['verified'] ?? false)

@@ -41,6 +41,8 @@ return [
         // Production: https://landtek.com.vn/auth/google/callback
         // Local dev:  http://localhost:8000/auth/google/callback
         'redirect'      => env('GOOGLE_REDIRECT_URI'),
+        // Optional: Maps JavaScript API (picker falls back to Leaflet if empty)
+        'maps_api_key'  => env('GOOGLE_MAPS_API_KEY'),
     ],
 
 ];

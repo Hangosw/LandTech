@@ -29,7 +29,8 @@ class PropertyController extends Controller
         }
 
         $hasExistingCover = $draftProperty && !empty($draftProperty->cover_image_url);
-        $hasExistingMedia = $draftProperty && ($draftProperty->media()->count() > 0 || $request->has('existing_media'));
+        $keptExistingImages = collect($request->input('existing_media', []))->filter()->count();
+        $hasImages = $keptExistingImages > 0 || $request->hasFile('images');
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -41,10 +42,14 @@ class PropertyController extends Controller
             'bathrooms' => 'required|integer|min:0',
             'area' => 'required|numeric|min:0',
             'monthly_price' => 'required|numeric|min:0',
+            'lat' => 'nullable|numeric|between:-90,90',
+            'lng' => 'nullable|numeric|between:-180,180',
             'utilities' => 'nullable|array',
-            'images' => ($hasExistingMedia ? 'nullable' : 'required') . '|array',
-            'images.*' => 'file|mimes:jpeg,png,jpg,webp,mp4,mov,avi|max:51200', // Max 50MB
-            'cover_image' => ($hasExistingCover ? 'nullable' : 'required') . '|image|mimes:jpeg,png,jpg,webp|max:10240' // Max 10MB
+            'images' => ($hasImages ? 'nullable' : 'required') . '|array|min:' . ($hasImages ? '0' : '1'),
+            'images.*' => 'file|mimes:jpeg,png,jpg,webp|max:10240',
+            'videos' => 'nullable|array',
+            'videos.*' => 'file|mimes:mp4,mov,avi,webm|max:51200',
+            'cover_image' => ($hasExistingCover ? 'nullable' : 'required') . '|image|mimes:jpeg,png,jpg,webp|max:10240',
         ]);
 
         // Create or update the property
@@ -66,7 +71,9 @@ class PropertyController extends Controller
         $property->price = $request->monthly_price; // Assuming monthly price is the main price for rent
         $property->transaction_type = 'rent';
         $property->status = 'choduyet';
-        
+        $property->lat = $request->filled('lat') ? $request->lat : null;
+        $property->lng = $request->filled('lng') ? $request->lng : null;
+
         $property->save();
 
         if ($request->has('utilities')) {
@@ -82,26 +89,19 @@ class PropertyController extends Controller
             $property->save(); // Save again to update cover_image_url
         }
 
-        // Handle Images & Videos
-        if ($request->hasFile('images')) {
-            $displayOrder = PropertyMedia::where('property_id', $property->id)->max('display_order') ?? 0;
-            $displayOrder++;
+        $newImageIds = $this->storeUploadedMedia($property, $request->file('images', []), 'image');
+        $newVideoIds = $this->storeUploadedMedia($property, $request->file('videos', []), 'video');
 
-            foreach ($request->file('images') as $file) {
-                $filename = uniqid('media_') . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('AnhDuAn'), $filename);
-                
-                // Determine if it's a video
-                $mimeType = $file->getClientMimeType();
-                $mediaType = str_starts_with($mimeType, 'video/') ? 'video' : 'image';
-                
-                PropertyMedia::create([
-                    'property_id' => $property->id,
-                    'media_type' => $mediaType,
-                    'file_url' => '/AnhDuAn/' . $filename,
-                    'display_order' => $displayOrder
-                ]);
-                $displayOrder++;
+        if ($draftProperty) {
+            $keepIds = collect($request->input('existing_media', []))
+                ->merge($request->input('existing_videos', []))
+                ->merge($newImageIds)
+                ->merge($newVideoIds)
+                ->filter()
+                ->values()
+                ->all();
+            if (!empty($keepIds)) {
+                PropertyMedia::where('property_id', $property->id)->whereNotIn('id', $keepIds)->delete();
             }
         }
 
@@ -149,10 +149,21 @@ class PropertyController extends Controller
         $sessionUser = session('user');
         $userId = $sessionUser['id'] ?? $sessionUser->id;
 
-        $property = Property::with(['media', 'utilities'])->where('id', $id)->where('user_id', $userId)->firstOrFail();
+        $property = Property::withoutGlobalScope('active')
+            ->with(['media', 'utilities'])
+            ->where('id', $id)
+            ->where('user_id', $userId)
+            ->firstOrFail();
         $utilities = \App\Models\Utility::where('is_active', true)->orderBy('sort_order')->get();
+        try {
+            $projectOptions = \Illuminate\Support\Facades\Schema::hasTable('projects')
+                ? \App\Models\Project::query()->active()->ordered()->get(['slug', 'label'])
+                : collect();
+        } catch (\Throwable $e) {
+            $projectOptions = collect();
+        }
 
-        return view('pages.post-property', compact('property', 'utilities'));
+        return view('pages.post-property', compact('property', 'utilities', 'projectOptions'));
     }
 
     /**
@@ -167,7 +178,10 @@ class PropertyController extends Controller
         $sessionUser = session('user');
         $userId = $sessionUser['id'] ?? $sessionUser->id;
 
-        $property = Property::where('id', $id)->where('user_id', $userId)->firstOrFail();
+        $property = Property::withoutGlobalScope('active')
+            ->where('id', $id)
+            ->where('user_id', $userId)
+            ->firstOrFail();
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -179,9 +193,14 @@ class PropertyController extends Controller
             'bathrooms' => 'required|integer|min:0',
             'area' => 'required|numeric|min:0',
             'monthly_price' => 'required|numeric|min:0',
+            'lat' => 'nullable|numeric|between:-90,90',
+            'lng' => 'nullable|numeric|between:-180,180',
             'utilities' => 'nullable|array',
-            'images.*' => 'file|mimes:jpeg,png,jpg,webp,mp4,mov,avi|max:51200', // Max 50MB
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240' // Max 10MB
+            'images' => 'nullable|array',
+            'images.*' => 'file|mimes:jpeg,png,jpg,webp|max:10240',
+            'videos' => 'nullable|array',
+            'videos.*' => 'file|mimes:mp4,mov,avi,webm|max:51200',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
         ]);
 
         $property->title = $request->title;
@@ -199,6 +218,8 @@ class PropertyController extends Controller
         $property->monthly_price = $request->monthly_price;
         $property->price = $request->monthly_price;
         $property->status = 'choduyet'; // Require re-approval on edit
+        $property->lat = $request->filled('lat') ? $request->lat : null;
+        $property->lng = $request->filled('lng') ? $request->lng : null;
 
         $property->save();
 
@@ -209,7 +230,7 @@ class PropertyController extends Controller
             $property->utilities()->detach();
         }
 
-        // Handle Cover Image
+        // Cover image
         if ($request->hasFile('cover_image')) {
             $file = $request->file('cover_image');
             $filename = uniqid('cover_') . '.' . $file->getClientOriginalExtension();
@@ -217,45 +238,26 @@ class PropertyController extends Controller
             $property->cover_image_url = '/AnhDuAn/' . $filename;
             $property->save();
         } elseif ($request->has('remove_cover') && $request->remove_cover == '1') {
-             // If we support removing cover image without replacing
-             // $property->cover_image_url = null;
-             // $property->save();
+             // reserved
         }
 
-        // Handle existing media
-        $existingMediaIds = $request->input('existing_media', []);
-        
-        // Delete media that are not in the existing_media array
-        $mediaToDelete = PropertyMedia::where('property_id', $property->id)
-            ->whereNotIn('id', $existingMediaIds)
-            ->get();
-            
-        foreach ($mediaToDelete as $media) {
-            // Optional: delete file from disk
-            // $path = public_path($media->file_url);
-            // if(file_exists($path)) { unlink($path); }
-            $media->delete();
-        }
+        // Upload new media first, then prune removed ones (keeps new uploads)
+        $keepIds = collect($request->input('existing_media', []))
+            ->merge($request->input('existing_videos', []))
+            ->filter()
+            ->values()
+            ->all();
 
-        // Handle new Images & Videos
-        if ($request->hasFile('images')) {
-            $displayOrder = PropertyMedia::where('property_id', $property->id)->max('display_order') ?? 0;
-            $displayOrder++;
-            
-            foreach ($request->file('images') as $file) {
-                $filename = uniqid('media_') . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('AnhDuAn'), $filename);
-                
-                $mimeType = $file->getClientMimeType();
-                $mediaType = str_starts_with($mimeType, 'video/') ? 'video' : 'image';
-                
-                PropertyMedia::create([
-                    'property_id' => $property->id,
-                    'media_type' => $mediaType,
-                    'file_url' => '/AnhDuAn/' . $filename,
-                    'display_order' => $displayOrder
-                ]);
-                $displayOrder++;
+        $newImageIds = $this->storeUploadedMedia($property, $request->file('images', []), 'image');
+        $newVideoIds = $this->storeUploadedMedia($property, $request->file('videos', []), 'video');
+        $keepIds = array_values(array_unique(array_merge($keepIds, $newImageIds, $newVideoIds)));
+
+        // JS always sends existing_* arrays on edit submit — sync to that list
+        if ($request->has('existing_media') || $request->has('existing_videos') || !empty($newImageIds) || !empty($newVideoIds)) {
+            if (!empty($keepIds)) {
+                PropertyMedia::where('property_id', $property->id)->whereNotIn('id', $keepIds)->delete();
+            } else {
+                PropertyMedia::where('property_id', $property->id)->delete();
             }
         }
 
@@ -312,7 +314,7 @@ class PropertyController extends Controller
         $property->title = $title;
         $property->slug = \Illuminate\Support\Str::slug($title) . '-' . time() . '-' . rand(100, 999);
         $property->property_type = $request->input('property_type', 'apartment');
-        $property->district = $request->input('district', 'Lộc Thọ');
+        $property->district = $request->input('district', 'Phường Nha Trang');
         $property->address = $request->input('address') ?: ($property->district ? $property->district . ', Nha Trang' : 'Nha Trang');
         $property->project = $request->input('project');
         $property->bedrooms = $request->input('bedrooms', 1);
@@ -323,6 +325,10 @@ class PropertyController extends Controller
         $property->transaction_type = 'rent';
         $property->description = $request->input('description');
         $property->status = 'nhap';
+        if ($request->filled('lat') && $request->filled('lng')) {
+            $property->lat = $request->input('lat');
+            $property->lng = $request->input('lng');
+        }
 
         $property->save();
 
@@ -366,5 +372,40 @@ class PropertyController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => 'Đã xóa bản nháp']);
+    }
+
+    /**
+     * Persist uploaded image/video files for a property.
+     *
+     * @param  array<int, \Illuminate\Http\UploadedFile>|null  $files
+     * @return array<int, int>
+     */
+    private function storeUploadedMedia(Property $property, ?array $files, string $mediaType): array
+    {
+        $createdIds = [];
+        if (empty($files)) {
+            return $createdIds;
+        }
+
+        $displayOrder = PropertyMedia::where('property_id', $property->id)->max('display_order') ?? 0;
+
+        foreach ($files as $file) {
+            if (!$file) {
+                continue;
+            }
+            $displayOrder++;
+            $filename = uniqid($mediaType === 'video' ? 'video_' : 'media_') . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('AnhDuAn'), $filename);
+
+            $media = PropertyMedia::create([
+                'property_id' => $property->id,
+                'media_type' => $mediaType,
+                'file_url' => '/AnhDuAn/' . $filename,
+                'display_order' => $displayOrder,
+            ]);
+            $createdIds[] = $media->id;
+        }
+
+        return $createdIds;
     }
 }

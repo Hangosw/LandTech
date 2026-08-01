@@ -5,10 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'LANDTEK — Thuê & Cho thuê bất động sản Nha Trang')</title>
     <meta name="description" content="@yield('description', 'Nền tảng thuê nhà chuyên biệt tại Nha Trang')">
-    
+    @hasSection('meta')
+        @yield('meta')
+    @else
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="LANDTEK">
+        <meta property="og:title" content="@yield('title', 'LANDTEK — Thuê & Cho thuê bất động sản Nha Trang')">
+        <meta property="og:description" content="@yield('description', 'Nền tảng thuê nhà chuyên biệt tại Nha Trang')">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:image" content="{{ asset('images/hero-nhatrang.jpg') }}">
+        <meta name="twitter:card" content="summary_large_image">
+    @endif
+
     {{-- CSS --}}
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite('resources/css/app.css')
+    @stack('styles')
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
@@ -85,7 +97,7 @@
         });
     </script>
     <style>
-        .swal-btn-primary { background: oklch(58% 0.13 218) !important; color: white !important; padding: 0.625rem 1.5rem !important; border-radius: 0.75rem !important; font-weight: 700 !important; font-size: 0.875rem !important; border: none !important; cursor: pointer !important; transition: opacity 0.2s !important; }
+        .swal-btn-primary { background: #0F3460 !important; color: white !important; padding: 0.625rem 1.5rem !important; border-radius: 0.75rem !important; font-weight: 700 !important; font-size: 0.875rem !important; border: none !important; cursor: pointer !important; transition: opacity 0.2s !important; }
         .swal-btn-primary:hover { opacity: 0.88 !important; }
         .swal-btn-secondary { background: #f1f5f9 !important; color: #475569 !important; padding: 0.625rem 1.5rem !important; border-radius: 0.75rem !important; font-weight: 700 !important; font-size: 0.875rem !important; border: none !important; cursor: pointer !important; margin-right: 0.5rem !important; transition: background 0.2s !important; }
         .swal-btn-secondary:hover { background: #e2e8f0 !important; }

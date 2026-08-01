@@ -67,9 +67,9 @@
         gap: 0.5rem;
         font-size: 0.8125rem;
         font-weight: 600;
-        color: oklch(58% 0.13 218);
-        background: oklch(58% 0.13 218 / 8%);
-        border: 1px solid oklch(58% 0.13 218 / 20%);
+        color: #0F3460;
+        background: rgba(15,52,96,0.08);
+        border: 1px solid rgba(15,52,96,0.20);
         padding: 0.5rem 1rem;
         border-radius: 0.75rem;
         text-decoration: none;
@@ -78,8 +78,8 @@
         flex-shrink: 0;
     }
     .btn-back:hover {
-        background: oklch(58% 0.13 218 / 14%);
-        border-color: oklch(58% 0.13 218 / 35%);
+        background: rgba(15,52,96,0.14);
+        border-color: rgba(15,52,96,0.35);
     }
 
     /* ===========================
@@ -110,7 +110,7 @@
         transform: translateY(-2px);
         box-shadow: 0 8px 20px -6px rgba(0,0,0,0.1);
     }
-    .stat-card.total  { border-left-color: oklch(58% 0.13 218); }
+    .stat-card.total  { border-left-color: #0F3460; }
     .stat-card.active { border-left-color: #10b981; }
     .stat-card.pending{ border-left-color: #f59e0b; }
     .stat-icon {
@@ -123,7 +123,7 @@
         font-size: 0.9rem;
         flex-shrink: 0;
     }
-    .stat-icon.blue   { background: oklch(58% 0.13 218 / 10%); color: oklch(58% 0.13 218); }
+    .stat-icon.blue   { background: rgba(15,52,96,0.10); color: #0F3460; }
     .stat-icon.green  { background: #ecfdf5; color: #059669; }
     .stat-icon.amber  { background: #fffbeb; color: #d97706; }
     .stat-info { min-width: 0; }
@@ -206,7 +206,7 @@
         flex-shrink: 0;
     }
     .filter-label i {
-        color: oklch(58% 0.13 218);
+        color: #0F3460;
         font-size: 0.7rem;
     }
     .filter-select {
@@ -230,8 +230,8 @@
         padding-right: 2rem;
     }
     .filter-select:focus {
-        border-color: oklch(58% 0.13 218);
-        box-shadow: 0 0 0 3px oklch(58% 0.13 218 / 12%);
+        border-color: #0F3460;
+        box-shadow: 0 0 0 3px rgba(15,52,96,0.12);
         background-color: white;
     }
     @media (min-width: 1024px) {
@@ -284,8 +284,8 @@
     }
     .search-input::placeholder { color: #94a3b8; }
     .search-input:focus {
-        border-color: oklch(58% 0.13 218);
-        box-shadow: 0 0 0 3px oklch(58% 0.13 218 / 12%);
+        border-color: #0F3460;
+        box-shadow: 0 0 0 3px rgba(15,52,96,0.12);
         background: white;
     }
     .length-select {
@@ -310,8 +310,8 @@
         .length-select { width: auto; }
     }
     .length-select:focus {
-        border-color: oklch(58% 0.13 218);
-        box-shadow: 0 0 0 3px oklch(58% 0.13 218 / 12%);
+        border-color: #0F3460;
+        box-shadow: 0 0 0 3px rgba(15,52,96,0.12);
         background-color: white;
     }
     .filter-divider {
@@ -372,10 +372,10 @@
         color: #0f172a !important;
     }
     .dt-paging-button.current {
-        background: oklch(58% 0.13 218) !important;
+        background: #0F3460 !important;
         color: white !important;
         border-color: transparent !important;
-        box-shadow: 0 2px 8px -2px oklch(58% 0.13 218 / 40%) !important;
+        box-shadow: 0 2px 8px -2px rgba(15,52,96,0.40) !important;
     }
     .dt-paging-button.disabled { opacity: 0.35; cursor: not-allowed; }
 
@@ -427,9 +427,9 @@
     /* Responsive child row */
     table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control::before,
     table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control::before {
-        background-color: oklch(58% 0.13 218) !important;
-        border-color: oklch(58% 0.13 218 / 30%) !important;
-        box-shadow: 0 0 0 3px oklch(58% 0.13 218 / 15%) !important;
+        background-color: #0F3460 !important;
+        border-color: rgba(15,52,96,0.30) !important;
+        box-shadow: 0 0 0 3px rgba(15,52,96,0.15) !important;
         width: 14px !important;
         height: 14px !important;
     }
@@ -563,8 +563,8 @@
         transition: all 0.2s;
         flex-shrink: 0;
     }
-    .dropdown-btn:hover { background: #f0fdfa; color: #0d9488; border-color: #99f6e4; }
-    .dropdown-btn.active { background: #f0fdfa; color: #0d9488; border-color: #99f6e4; }
+    .dropdown-btn:hover { background: #EBF3FF; color: #0F3460; border-color: #B9D2F0; }
+    .dropdown-btn.active { background: #EBF3FF; color: #0F3460; border-color: #B9D2F0; }
 
     /* ===========================
        POST CELL — Compact inline
@@ -606,7 +606,7 @@
         overflow: hidden;
         transition: color 0.15s;
     }
-    .post-cell:hover .post-title { color: oklch(58% 0.13 218); }
+    .post-cell:hover .post-title { color: #0F3460; }
     .post-addr {
         font-size: 0.7rem;
         color: #94a3b8;
@@ -755,8 +755,8 @@
                     <option value="Bình Thạnh">Bình Thạnh</option>
                 </select>
                 <select id="filterStatus" class="filter-select">
+                    <option value="Sẵn sàng cho thuê" selected>Sẵn sàng cho thuê (Đang chạy)</option>
                     <option value="">Tất cả trạng thái</option>
-                    <option value="Sẵn sàng cho thuê">Sẵn sàng cho thuê</option>
                     <option value="Chờ duyệt">Chờ duyệt</option>
                     <option value="Nháp">Nháp</option>
                     <option value="Đã cho thuê">Đã cho thuê</option>
@@ -979,7 +979,7 @@
                             ? `<div style="font-size:10px;color:#94a3b8;font-weight:600;margin-top:2px;">/ tháng</div>`
                             : '';
                         return `
-                        <div style="font-size:13px;font-weight:800;color:oklch(58% 0.13 218);">
+                        <div style="font-size:13px;font-weight:800;color:#0F3460;">
                             ${formattedPrice} <span style="font-size:10px;font-weight:600;">VNĐ</span>
                         </div>${monthHtml}`;
                     }
@@ -1115,7 +1115,9 @@
 
         $('#filterProject, #filterDistrict').on('change', function() { table.draw(); });
 
-        // Filter: Status
+        // Filter: Status — Mặc định chỉ lấy ra các bài đăng đang được duyệt chạy ("Sẵn sàng cho thuê")
+        table.column(5).search($('#filterStatus').val()).draw();
+
         $('#filterStatus').on('change', function() {
             table.column(5).search($(this).val()).draw();
         });

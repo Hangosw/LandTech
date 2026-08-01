@@ -2,6 +2,21 @@
 
 @php
     $targetProp = $property ?? $draftProperty ?? null;
+    $isEditMode = isset($property);
+    $existingImages = collect();
+    $existingVideos = collect();
+    if ($targetProp && $targetProp->media) {
+        foreach ($targetProp->media as $m) {
+            $ext = strtolower(pathinfo($m->file_url ?? '', PATHINFO_EXTENSION));
+            $isVideo = ($m->media_type === 'video') || in_array($ext, ['mp4', 'mov', 'avi', 'webm'], true);
+            $row = ['id' => $m->id, 'url' => $m->file_url, 'type' => $isVideo ? 'video' : 'image', 'is_existing' => true];
+            if ($isVideo) {
+                $existingVideos->push($row);
+            } else {
+                $existingImages->push($row);
+            }
+        }
+    }
 @endphp
 
 @section('title', isset($property) ? 'Chỉnh sửa tin đăng — LANDTEK' : 'Đăng tin cho thuê — LANDTEK')
@@ -74,22 +89,35 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Khu vực <span class="text-red-500">*</span></label>
-                    <select name="district" required class="w-full rounded-lg border border-gray-200 bg-gray-50/30 px-4 py-3 text-sm text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-colors appearance-none">
-                        <option value="Lộc Thọ" {{ (isset($targetProp) && $targetProp->district == 'Lộc Thọ') ? 'selected' : '' }}>Lộc Thọ</option>
-                        <option value="Phước Hải" {{ (isset($targetProp) && $targetProp->district == 'Phước Hải') ? 'selected' : '' }}>Phước Hải</option>
-                        <option value="Vĩnh Hòa" {{ (isset($targetProp) && $targetProp->district == 'Vĩnh Hòa') ? 'selected' : '' }}>Vĩnh Hòa</option>
-                        <option value="Vĩnh Nguyên" {{ (isset($targetProp) && $targetProp->district == 'Vĩnh Nguyên') ? 'selected' : '' }}>Vĩnh Nguyên</option>
-                        <option value="Tân Lập" {{ (isset($targetProp) && $targetProp->district == 'Tân Lập') ? 'selected' : '' }}>Tân Lập</option>
-                    </select>
+                    @include('components.area-select', [
+                        'name' => 'district',
+                        'required' => true,
+                        'selectedValue' => $targetProp->district ?? '',
+                        'placeholder' => 'Chọn khu vực...',
+                        'class' => 'w-full rounded-lg border border-gray-200 bg-gray-50/30 px-4 py-3 text-sm text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-colors appearance-none',
+                    ])
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Dự án (nếu có)</label>
                     <select name="project" class="w-full rounded-lg border border-gray-200 bg-gray-50/30 px-4 py-3 text-sm text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-colors appearance-none">
                         <option value="">— Không thuộc dự án —</option>
-                        <option value="muong-thanh" {{ (isset($targetProp) && $targetProp->project == 'muong-thanh') ? 'selected' : '' }}>Mường Thanh</option>
-                        <option value="vinpearl" {{ (isset($targetProp) && $targetProp->project == 'vinpearl') ? 'selected' : '' }}>Vinpearl</option>
-                        <option value="sun-group" {{ (isset($targetProp) && $targetProp->project == 'sun-group') ? 'selected' : '' }}>Sun Group</option>
-                        <option value="gold-coast" {{ (isset($targetProp) && $targetProp->project == 'gold-coast') ? 'selected' : '' }}>Gold Coast</option>
+                        @php
+                            $projectOptions = $projectOptions
+                                ?? (\Illuminate\Support\Facades\Schema::hasTable('projects')
+                                    ? \App\Models\Project::query()->active()->ordered()->get(['slug', 'label'])
+                                    : collect());
+                        @endphp
+                        @forelse($projectOptions as $opt)
+                            <option value="{{ $opt->slug }}" {{ (isset($targetProp) && $targetProp->project == $opt->slug) ? 'selected' : '' }}>
+                                {{ $opt->label }}
+                            </option>
+                        @empty
+                            <option value="muong-thanh" {{ (isset($targetProp) && $targetProp->project == 'muong-thanh') ? 'selected' : '' }}>Mường Thanh</option>
+                            <option value="vinpearl" {{ (isset($targetProp) && $targetProp->project == 'vinpearl') ? 'selected' : '' }}>Vinpearl</option>
+                            <option value="sun-group" {{ (isset($targetProp) && $targetProp->project == 'sun-group') ? 'selected' : '' }}>Sun Group</option>
+                            <option value="scenia-bay" {{ (isset($targetProp) && $targetProp->project == 'scenia-bay') ? 'selected' : '' }}>Scenia Bay</option>
+                            <option value="gold-coast" {{ (isset($targetProp) && $targetProp->project == 'gold-coast') ? 'selected' : '' }}>Gold Coast</option>
+                        @endforelse
                     </select>
                 </div>
             </div>
@@ -174,39 +202,25 @@
                 </div>
             </div>
 
-            <!-- Hình ảnh / Video -->
+            <!-- Hình ảnh căn nhà (chỉ ảnh) -->
             <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Hình ảnh / Video <span class="text-red-500">*</span></label>
-                
-                <!-- Dropzone -->
-                <div @click="$refs.fileInput.click()" 
-                     @dragover.prevent="dragover = true" 
-                     @dragleave.prevent="dragover = false" 
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Hình ảnh căn nhà <span class="text-red-500">*</span></label>
+                <div @click="$refs.fileInput.click()"
+                     @dragover.prevent="dragover = true"
+                     @dragleave.prevent="dragover = false"
                      @drop.prevent="handleDrop($event)"
-                     :class="dragover ? 'border-teal-500 bg-teal-50' : 'border-gray-300 bg-gray-50/50 hover:bg-gray-50'"
+                     :class="dragover ? 'border-navy bg-navy/5' : 'border-gray-300 bg-gray-50/50 hover:bg-gray-50'"
                      class="border-2 border-dashed rounded-lg cursor-pointer transition-colors flex flex-col items-center justify-center py-8 mb-4 relative">
-                    <i class="fas fa-arrow-up-from-bracket text-xl text-gray-600 mb-3" :class="dragover ? 'text-teal-500' : ''"></i>
-                    <p class="text-[13px] text-gray-500">Kéo thả ảnh/video vào đây — tự động đóng watermark LANDTEK</p>
-                    <p class="text-[11px] text-gray-400 mt-1">Ảnh (JPG, PNG) tối đa 5MB. Video (MP4) tối đa 50MB.</p>
-                    <input type="file" x-ref="fileInput" name="images[]" multiple accept="image/*,video/mp4,video/quicktime,video/x-msvideo" @change="handleFiles($event)" class="hidden">
+                    <i class="fas fa-images text-xl text-gray-600 mb-3"></i>
+                    <p class="text-[13px] text-gray-500">Kéo thả hoặc chọn ảnh — album xem tin</p>
+                    <p class="text-[11px] text-gray-400 mt-1">JPG, PNG, WEBP · tối đa 10MB/ảnh</p>
+                    <input type="file" x-ref="fileInput" name="images[]" multiple accept="image/jpeg,image/png,image/jpg,image/webp" @change="handleFiles($event)" class="hidden">
                 </div>
-
-                <!-- Preview Grid -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" x-show="previewImages.length > 0">
-                    <template x-for="(item, index) in previewImages" :key="index">
+                    <template x-for="(item, index) in previewImages" :key="'img-'+index">
                         <div class="relative group aspect-video rounded-lg border border-gray-200 bg-gray-100 flex items-center justify-center">
-                            <!-- Image Preview -->
-                            <template x-if="item.type === 'image'">
-                                <img :src="item.url" class="w-full h-full object-cover rounded-lg">
-                            </template>
-                            
-                            <!-- Video Preview -->
-                            <template x-if="item.type === 'video'">
-                                <video :src="item.url" class="w-full h-full object-cover rounded-lg" controls muted></video>
-                            </template>
-
-                            <!-- Xóa ảnh -->
-                            <button type="button" @click.prevent="removeImage(index)" 
+                            <img :src="item.url" class="w-full h-full object-cover rounded-lg" alt="">
+                            <button type="button" @click.prevent="removeImage(index)"
                                     class="absolute -top-2.5 -right-2.5 w-7 h-7 bg-white text-gray-400 hover:text-red-500 rounded-full flex items-center justify-center shadow-md border border-gray-200 z-10 transition-all hover:scale-110">
                                 <i class="fas fa-times text-sm"></i>
                             </button>
@@ -214,6 +228,43 @@
                     </template>
                 </div>
             </div>
+
+            <!-- Video riêng -->
+            <div class="rounded-xl border border-amber-100 bg-amber-50/40 p-4 sm:p-5">
+                <div class="mb-3 flex items-start gap-3">
+                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-brand text-navy">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-navy">Video tham quan <span class="font-normal text-gray-400">(tuỳ chọn)</span></label>
+                        <p class="mt-0.5 text-[11px] leading-relaxed text-gray-500">
+                            Upload riêng khỏi album ảnh — trên trang xem tin, video hiện ở khối riêng để khách không nhầm với carousel hình.
+                        </p>
+                    </div>
+                </div>
+                <div @click="$refs.videoInput.click()"
+                     class="border-2 border-dashed border-amber-200 rounded-lg cursor-pointer bg-white/80 hover:bg-white flex flex-col items-center justify-center py-6 mb-3 transition-colors">
+                    <i class="fas fa-cloud-arrow-up text-lg text-amber-600 mb-2"></i>
+                    <p class="text-[13px] text-gray-600">Chọn video MP4 / MOV / WEBM</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Tối đa 50MB · có thể thêm nhiều video</p>
+                    <input type="file" x-ref="videoInput" name="videos[]" multiple accept="video/mp4,video/quicktime,video/webm,video/x-msvideo" @change="handleVideos($event)" class="hidden">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" x-show="previewVideos.length > 0">
+                    <template x-for="(item, index) in previewVideos" :key="'vid-'+index">
+                        <div class="relative rounded-lg border border-amber-100 bg-navy overflow-hidden aspect-video">
+                            <video :src="item.url" class="w-full h-full object-contain bg-black" controls muted playsinline></video>
+                            <span class="absolute left-2 top-2 rounded bg-amber-brand px-2 py-0.5 text-[10px] font-bold text-navy">VIDEO</span>
+                            <button type="button" @click.prevent="removeVideo(index)"
+                                    class="absolute top-2 right-2 w-7 h-7 bg-white text-gray-500 hover:text-red-500 rounded-full flex items-center justify-center shadow border border-gray-200">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Ghim bản đồ -->
+            @include('components.map-pin-picker')
 
             <!-- Submit Button -->
             <div class="pt-6">
@@ -234,16 +285,21 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('propertyForm', () => ({
             dragover: false,
-            previewImages: {!! isset($targetProp) && $targetProp->media ? json_encode($targetProp->media->map(function($m) { return ['id' => $m->id, 'url' => $m->file_url, 'type' => $m->media_type, 'is_existing' => true]; })) : '[]' !!},
+            previewImages: {!! $existingImages->isNotEmpty() ? $existingImages->values()->toJson() : '[]' !!},
+            previewVideos: {!! $existingVideos->isNotEmpty() ? $existingVideos->values()->toJson() : '[]' !!},
             coverImagePreview: '{!! isset($targetProp) && $targetProp->cover_image_url ? $targetProp->cover_image_url : '' !!}',
             coverImageFile: null,
             removeCoverFlag: false,
             isSubmitting: false,
             hasSubmitted: false,
-            draftId: {{ isset($targetProp) && $targetProp->status == 'nhap' ? $targetProp->id : 'null' }},
+            isEditMode: {{ $isEditMode ? 'true' : 'false' }},
+            draftId: {{ (!$isEditMode && isset($targetProp) && $targetProp->status == 'nhap') ? $targetProp->id : 'null' }},
             autoSaveTimer: null,
 
             init() {
+                // Không auto-save nháp khi đang sửa tin đã đăng
+                if (this.isEditMode) return;
+
                 this.$nextTick(() => {
                     let form = this.$refs.form;
                     if (form) {
@@ -272,13 +328,14 @@
             },
 
             autoSaveDraft() {
-                if (this.hasSubmitted || !this.$refs.form) return;
+                if (this.isEditMode || this.hasSubmitted || !this.$refs.form) return;
                 let form = this.$refs.form;
                 let formData = new FormData(form);
                 if (this.draftId) {
                     formData.append('draft_id', this.draftId);
                 }
                 formData.delete('images[]');
+                formData.delete('videos[]');
                 formData.delete('cover_image');
 
                 fetch('{{ route("property.draft.save") }}', {
@@ -336,6 +393,13 @@
                 }
             },
 
+            handleVideos(event) {
+                if (event.target.files.length > 0) {
+                    this.addVideos(event.target.files);
+                }
+                if (this.$refs.videoInput) this.$refs.videoInput.value = '';
+            },
+
             handleCover(event) {
                 if (event.target.files.length > 0) {
                     let file = event.target.files[0];
@@ -364,20 +428,33 @@
             addFiles(files) {
                 for (let i = 0; i < files.length; i++) {
                     let file = files[i];
-                    let isImage = file.type.match('image.*');
-                    let isVideo = file.type.match('video.*');
-
-                    if (isImage || isVideo) {
-                        let url = URL.createObjectURL(file);
-                        this.previewImages.push({
-                            url: url,
-                            file: file,
-                            type: isVideo ? 'video' : 'image',
-                            is_existing: false
-                        });
-                    }
+                    if (!file.type.match('image.*')) continue;
+                    this.previewImages.push({
+                        url: URL.createObjectURL(file),
+                        file: file,
+                        type: 'image',
+                        is_existing: false
+                    });
                 }
                 this.$refs.fileInput.value = '';
+                this.scheduleAutoSave();
+            },
+
+            addVideos(files) {
+                for (let i = 0; i < files.length; i++) {
+                    let file = files[i];
+                    if (!file.type.match('video.*')) continue;
+                    if (file.size > 50 * 1024 * 1024) {
+                        SwalWarning.fire({ title: 'Video quá lớn', text: file.name + ' vượt quá 50MB.' });
+                        continue;
+                    }
+                    this.previewVideos.push({
+                        url: URL.createObjectURL(file),
+                        file: file,
+                        type: 'video',
+                        is_existing: false
+                    });
+                }
                 this.scheduleAutoSave();
             },
 
@@ -389,17 +466,25 @@
                 this.scheduleAutoSave();
             },
 
+            removeVideo(index) {
+                if (!this.previewVideos[index].is_existing) {
+                    URL.revokeObjectURL(this.previewVideos[index].url);
+                }
+                this.previewVideos.splice(index, 1);
+                this.scheduleAutoSave();
+            },
+
             submitForm() {
                 if (!this.coverImagePreview) {
                     SwalWarning.fire({ title: 'Thiếu ảnh bìa!', text: 'Vui lòng chọn ảnh bìa cho dự án.' });
                     return;
                 }
-                
+
                 if (this.previewImages.length === 0) {
-                    SwalWarning.fire({ title: 'Thiếu hình ảnh!', text: 'Vui lòng chọn ít nhất 1 hình ảnh/video cho bất động sản.' });
+                    SwalWarning.fire({ title: 'Thiếu hình ảnh!', text: 'Vui lòng chọn ít nhất 1 ảnh căn nhà (video upload riêng bên dưới).' });
                     return;
                 }
-                
+
                 this.isSubmitting = true;
                 this.hasSubmitted = true;
 
@@ -409,8 +494,22 @@
                     formData.append('draft_id', this.draftId);
                 }
 
+                // Nested Alpine map picker: ensure coords survive FormData
+                const latInput = form.querySelector('input[name="lat"]');
+                const lngInput = form.querySelector('input[name="lng"]');
+                if (latInput && lngInput && latInput.value !== '' && lngInput.value !== '' && latInput.value !== 'null') {
+                    formData.set('lat', latInput.value);
+                    formData.set('lng', lngInput.value);
+                } else {
+                    formData.delete('lat');
+                    formData.delete('lng');
+                }
+
                 formData.delete('images[]');
+                formData.delete('videos[]');
                 formData.delete('cover_image');
+                formData.delete('existing_media[]');
+                formData.delete('existing_videos[]');
                 if (this.coverImageFile) {
                     formData.append('cover_image', this.coverImageFile);
                 }
@@ -423,6 +522,20 @@
                     }
                 });
 
+                this.previewVideos.forEach((vid) => {
+                    if (vid.is_existing) {
+                        formData.append('existing_videos[]', vid.id);
+                    } else {
+                        formData.append('videos[]', vid.file);
+                    }
+                });
+
+                // Báo cho backend biết form đã sync media (kể cả khi list rỗng)
+                if (this.isEditMode) {
+                    formData.append('existing_media[]', '');
+                    formData.append('existing_videos[]', '');
+                }
+
                 fetch(form.action, {
                     method: 'POST',
                     body: formData,
@@ -434,18 +547,18 @@
                     if (response.ok) {
                         Swal.fire({
                             title: 'Thành công!',
-                            text: 'Đã gửi bài đăng, vui lòng đợi Admin duyệt.',
+                            text: @json($isEditMode ? 'Đã cập nhật tin đăng.' : 'Đã gửi bài đăng, vui lòng đợi Admin duyệt.'),
                             icon: 'success',
                             showCancelButton: true,
                             confirmButtonText: 'Đồng ý',
                             cancelButtonText: 'Xem danh sách tin đã đăng',
-                            confirmButtonColor: '#0d9488',
+                            confirmButtonColor: '#0F3460',
                             cancelButtonColor: '#6b7280'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                window.location.href = "{{ route('property.post') }}";
+                                window.location.href = @json($isEditMode ? route('my-properties') : route('property.post'));
                             } else if (result.dismiss === Swal.DismissReason.cancel) {
-                                window.location.href = "/quan-ly-tin-dang"; 
+                                window.location.href = "/quan-ly-tin-dang";
                             }
                         });
                     } else {
